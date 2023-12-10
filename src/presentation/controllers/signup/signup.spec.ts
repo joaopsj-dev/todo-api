@@ -126,6 +126,21 @@ describe('SignUpController', () => {
     })
   })
 
+  test('Should call Generate Token with correct values', async () => {
+    const { sut, tokenProviderStub, addAccountStub } = makeSut()
+    jest.spyOn(addAccountStub, 'add').mockReturnValueOnce(new Promise(resolve => resolve(makeFakeAccount())))
+    const generateTokenSpy = jest.spyOn(tokenProviderStub, 'generate')
+    await sut.handle(makeFakeRequest())
+    expect(generateTokenSpy).toHaveBeenCalledWith({ id: 'valid_id', email: 'valid_email' })
+  })
+
+  test('Should call Validator with correct values', async () => {
+    const { sut, validatorStub } = makeSut()
+    const validatorSpy = jest.spyOn(validatorStub, 'validate')
+    await sut.handle(makeFakeRequest())
+    expect(validatorSpy).toHaveBeenCalledWith(makeFakeRequest().body)
+  })
+
   test('Should return 200 if valid data is provided', async () => {
     const { sut } = makeSut()
     const httpResponse = await sut.handle(makeFakeRequest())
