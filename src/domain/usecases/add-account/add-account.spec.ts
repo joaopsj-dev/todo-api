@@ -92,6 +92,13 @@ describe('AddAccount UseCase', () => {
     expect(encryptSpy).toHaveBeenCalledWith('valid_password')
   })
 
+  test('Should call AccountRepository Create with correct values', async () => {
+    const { sut, accountRepositoryStub } = makeSut()
+    const createSpy = jest.spyOn(accountRepositoryStub, 'create')
+    await sut.add(makeFakeAccount())
+    expect(createSpy).toHaveBeenCalledWith(makeFakeAccount())
+  })
+
   test('Should return an account if on success', async () => {
     const { sut } = makeSut()
     const account = await sut.add(makeFakeAddAccountData())
