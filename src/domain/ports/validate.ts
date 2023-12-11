@@ -7,5 +7,5 @@ export type ValidateError = {
 }[]
 
 export interface Validator {
-  validate: (data: any) => Promise<Either<ValidateError, any>>
+  validate: (data: any) => Promise<Either<ValidateError, void>>
 }
