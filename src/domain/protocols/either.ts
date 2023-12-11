@@ -1,7 +1,7 @@
 /* eslint-disable n/handle-callback-err */
 export type Either<F, S> = Failure<F, S> | Success<F, S>
 
-class Failure<F, S> {
+export class Failure<F, S> {
   constructor (public error: F) {}
 
   isFailure (): this is Failure<F, S> {
@@ -13,7 +13,7 @@ class Failure<F, S> {
   }
 }
 
-class Success<F, S> {
+export class Success<F, S> {
   constructor (public response: S) {}
 
   isSuccess (): this is Success<F, S> {

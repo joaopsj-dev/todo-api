@@ -1,6 +1,9 @@
 import { type SignOptions, type VerifyOptions } from 'jsonwebtoken'
-import { type TokenPayload } from '../../../domain/ports/token'
+import { type ParseTokenError, type TokenPayload } from '../../../domain/ports/token'
 import { JwtTokenAdapter } from './jwt-token-adapter'
+import { type Failure } from '../../../domain/protocols/either'
+
+type FailureByParse = Failure<ParseTokenError, null>
 
 interface SutTypes {
   sut: JwtTokenAdapter
@@ -22,12 +25,12 @@ const makeSut = async (generateOptions?: SignOptions, parseOptions?: VerifyOptio
 
 describe('JwtTokenAdapter', () => {
   test('Parsed should returns an failure if invalid token', async () => {
-    const { sut }: any = await makeSut()
-    const parsedError = await sut.parse('invalid_token')
+    const { sut } = await makeSut()
+    const parsedError = await sut.parse('invalid_token') as FailureByParse
     expect(parsedError.error).toEqual({ name: 'JsonWebTokenError', message: 'jwt malformed' })
   })
 
-  test('Should have the correct properties in parsed response', async () => {
+  test('Should returns an correct payload if parsed is success', async () => {
     const { parsedToken } = await makeSut()
 
     expect(parsedToken).toHaveProperty('createdIn')
