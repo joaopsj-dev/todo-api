@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "ts-node src/app/server/index.ts",
     "test": "jest --passWithNoTests --silent --noStackTrace --runInBand",
     "test:unit": "npm test -- --watch -c jest-unit-config.js",
     "test:integration": "npm test -- --watch -c jest-integration-config.js",
@@ -11,7 +12,8 @@
     "test:verbose": "jest --passWithNoTests",
     "test:ci": "npm test -- --coverage",
     "lint": "eslint ./**/*.ts --fix",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "migrate:test": "sequelize-cli db:migrate --config src/test/sequelize/config.js --migrations-path src/test/sequelize/migrations"
   },
   "keywords": [],
   "author": "",

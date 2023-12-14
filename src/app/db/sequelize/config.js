@@ -1,6 +1,6 @@
 module.exports = {
   development: {
-    database: 'todo-db', 
+    database: 'db-dev', 
     username: 'postgres', 
     password: 'postgres',
     host: 'localhost', 
