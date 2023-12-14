@@ -1,35 +1,30 @@
-import { DataTypes, Sequelize } from 'sequelize';
+import { DataTypes } from 'sequelize';
+import { sequelizeTest } from '../../../../test/sequelize/sequelize';
 import { SequelizeAccountRepositoryAdapter } from './sequelize-repository';
 
-const makeSequelize = new Sequelize({
-  database: 'todo-db',
-  username: 'postgres',
-  password: 'postgres',
-  host: 'localhost',
-  dialect: 'postgres'
-})
-
-const MakeAccountModel = makeSequelize.define('accounts', {
+const makeAccountModel = sequelizeTest.define('accounts_test', {
   name: DataTypes.STRING,
   email: DataTypes.STRING,
   password: DataTypes.STRING
+}, {
+  tableName: 'accounts_test'
 });
 
 const makeSut = (): SequelizeAccountRepositoryAdapter => {
-  return new SequelizeAccountRepositoryAdapter(MakeAccountModel)
+  return new SequelizeAccountRepositoryAdapter(makeAccountModel)
 }
 
 describe('Account Sequelize Repository', () => {
   beforeAll(async () => {
-    await makeSequelize.authenticate()
+    await sequelizeTest.authenticate()
   })
 
   afterAll(async () => {
-    await makeSequelize.close()
+    await sequelizeTest.close()
   })
 
   afterEach(async () => {
-    await MakeAccountModel.destroy({ where: {}, truncate: true })
+    await makeAccountModel.destroy({ where: {}, truncate: true })
   })
 
   test('Should return an account on success', async () => {
