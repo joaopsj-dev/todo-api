@@ -3,7 +3,7 @@ import { type ValidateError } from '../../../domain/ports/validate'
 import { type Token, type AddAccount, type Validator, type HttpRequest } from './signup-protocols'
 import { success, type Either, failure } from '../../../domain/protocols/either'
 import { SignUpController } from './signup'
-import { badRequest, ok, serverError } from '../../helpers/http-helper'
+import { badRequest, conflict, ok, serverError } from '../../helpers/http-helper'
 
 const makeFakeRequest = (): HttpRequest => ({
   body: {
@@ -83,6 +83,13 @@ describe('SignUpController', () => {
     jest.spyOn(validatorStub, 'validate').mockReturnValueOnce(new Promise(resolve => resolve(failure(validateError))))
     const httpResponse = await sut.handle(makeFakeRequest())
     expect(httpResponse).toEqual(badRequest(validateError))
+  })
+
+  test('Should return 409 if email already exists', async () => {
+    const { sut, addAccountStub } = makeSut()
+    jest.spyOn(addAccountStub, 'add').mockReturnValueOnce(null)
+    const httpResponse = await sut.handle(makeFakeRequest())
+    expect(httpResponse).toEqual(conflict({ message: 'email already exists' }))
   })
 
   test('Should return 500 if AddAccount throws', async () => {

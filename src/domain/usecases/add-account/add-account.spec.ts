@@ -59,8 +59,8 @@ describe('AddAccount UseCase', () => {
     const { sut, accountRepositoryStub } = makeSut()
 
     jest.spyOn(accountRepositoryStub, 'findByEmail').mockReturnValueOnce(new Promise(resolve => resolve(makeFakeAccount())))
-    const promise = sut.add(makeFakeAddAccountData())
-    await expect(promise).rejects.toThrow()
+    const response = await sut.add(makeFakeAddAccountData())
+    expect(response).toBeNull()
   })
 
   test('Should call findByEmail with correct e-mail', async () => {

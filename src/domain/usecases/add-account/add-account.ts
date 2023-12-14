@@ -10,7 +10,7 @@ export class AddAccount {
   async add (accountData: AddAccountData): Promise<Account> {
     const accountByEmail = await this.accountRepository.findByEmail(accountData.email)
     if (accountByEmail) {
-      throw new Error('E-mail already registered')
+      return null
     }
 
     const hashedPassword = await this.encrypter.encrypt(accountData.password)

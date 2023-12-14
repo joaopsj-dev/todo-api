@@ -5,6 +5,11 @@ export const badRequest = (error: any): HttpResponse => ({
   body: error
 })
 
+export const conflict = (error: any): HttpResponse => ({
+  statusCode: 409,
+  body: error
+})
+
 export const serverError = (error: Error): HttpResponse => ({
   statusCode: 500,
   body: {

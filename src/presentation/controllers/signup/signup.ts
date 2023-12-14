@@ -1,5 +1,5 @@
 import { type Validator, type Token, type Controller, type AddAccount, type HttpRequest, type HttpResponse } from './signup-protocols'
-import { badRequest, ok, serverError } from '../../helpers/http-helper'
+import { badRequest, conflict, ok, serverError } from '../../helpers/http-helper'
 
 export class SignUpController implements Controller {
   constructor (
@@ -15,11 +15,15 @@ export class SignUpController implements Controller {
         return badRequest(validateResponse.error)
       }
 
-      const { id, email } = await this.addAccount.add(httpRequest.body)
+      const account = await this.addAccount.add(httpRequest.body)
+
+      if (!account) {
+        return conflict({ message: 'email already exists' })
+      }
 
       const accessToken = await this.token.generate({
-        id,
-        email
+        id: account.id,
+        email: account.email
       })
 
       return ok({ accessToken })
