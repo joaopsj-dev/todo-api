@@ -1,14 +1,6 @@
-import { DataTypes } from 'sequelize';
 import { sequelizeTest } from '../../../../test/sequelize/sequelize';
 import { SequelizeAccountRepositoryAdapter } from './sequelize-repository';
-
-const makeAccountModel = sequelizeTest.define('accounts_test', {
-  name: DataTypes.STRING,
-  email: DataTypes.STRING,
-  password: DataTypes.STRING
-}, {
-  tableName: 'accounts_test'
-});
+import { makeAccountModel } from '../../../../test/sequelize/models/account';
 
 const makeSut = (): SequelizeAccountRepositoryAdapter => {
   return new SequelizeAccountRepositoryAdapter(makeAccountModel)
@@ -41,7 +33,6 @@ describe('Account Sequelize Repository', () => {
     const sut = makeSut()
     await sut.create({ id: 'valid_id', name: 'valid_name', email: 'valid_email', password: 'valid_password' })
     const accountByEmail = await sut.findByEmail('valid_email')
-    console.log(accountByEmail);
     expect(accountByEmail.email).toBe('valid_email')
   })
 })
