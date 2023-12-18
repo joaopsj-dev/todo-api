@@ -1,5 +1,15 @@
 import { type HttpResponse } from '../protocols/http';
 
+export const notFound = (error: any): HttpResponse => ({
+  statusCode: 404,
+  body: error
+})
+
+export const unauthorized = (error: any): HttpResponse => ({
+  statusCode: 401,
+  body: error
+})
+
 export const badRequest = (error: any): HttpResponse => ({
   statusCode: 400,
   body: error
