@@ -1,8 +1,8 @@
 import request from 'supertest'
 import { sequelizeTest } from '../../../../test/sequelize/sequelize'
 import { makeAccountModel } from '../../../../test/sequelize/models/account'
-import app from './make-app'
-import signupApp from '../signup/make-app'
+import loginAppStub from '../../../../test/app-stub/login'
+import signupAppStub from '../../../../test/app-stub/signup'
 
 describe('login Routes', () => {
   beforeAll(async () => {
@@ -18,7 +18,7 @@ describe('login Routes', () => {
   })
 
   test('Should return an access token on success', async () => {
-    await request(signupApp)
+    await request(signupAppStub)
       .post('/api/signup')
       .send({
         name: 'any_name',
@@ -26,7 +26,7 @@ describe('login Routes', () => {
         password: 'any_password'
       })
 
-    await request(app)
+    await request(loginAppStub)
       .post('/api/login')
       .send({
         email: 'any_email@mail.com',

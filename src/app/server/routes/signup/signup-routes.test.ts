@@ -1,7 +1,7 @@
 import request from 'supertest'
 import { sequelizeTest } from '../../../../test/sequelize/sequelize'
 import { makeAccountModel } from '../../../../test/sequelize/models/account'
-import app from './make-app'
+import signupAppStub from '../../../../test/app-stub/signup'
 
 describe('SignUp Routes', () => {
   beforeAll(async () => {
@@ -17,7 +17,7 @@ describe('SignUp Routes', () => {
   })
 
   test('Should return an account on success', async () => {
-    await request(app)
+    await request(signupAppStub)
       .post('/api/signup')
       .send({
         name: 'any_name',
