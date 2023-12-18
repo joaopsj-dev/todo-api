@@ -12,5 +12,3 @@ export class BcryptEncrypterAdapter implements Encrypter {
     return await bcrypt.compare(data, encrypted)
   }
 }
-
-console.log(bcrypt);

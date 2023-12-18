@@ -17,9 +17,9 @@ export class Authenticate {
       return failure({ message: 'user not found' })
     }
 
-    const hashedPassword = await this.encrypter.encrypt(password)
+    const resultParsed = await this.encrypter.parse(password, accountByEmail.password)
 
-    if (accountByEmail.password !== hashedPassword) {
+    if (!resultParsed) {
       return failure({ message: 'incorrect password' })
     }
 

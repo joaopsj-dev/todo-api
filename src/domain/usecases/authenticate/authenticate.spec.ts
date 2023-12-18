@@ -31,6 +31,10 @@ const makeEncrypter = (): Encrypter => {
     async encrypt (data: string): Promise<string> {
       return new Promise(resolve => resolve('hashed_password'))
     }
+
+    async parse (data: string, encrypted: string): Promise<boolean> {
+      return new Promise(resolve => resolve(true))
+    }
   }
   return new EncryptStub()
 }
@@ -65,6 +69,14 @@ describe('Authenticate UseCase', () => {
     expect(response.error.message).toBe('user not found')
   })
 
+  test('Should return a correct error if incorrect password', async () => {
+    const { sut, encrypterStub } = makeSut()
+
+    jest.spyOn(encrypterStub, 'parse').mockReturnValueOnce(new Promise(resolve => resolve(false)))
+    const response = await sut.auth(makeFakeAuthenticateData()) as FailureByAuthenticate
+    expect(response.error.message).toBe('incorrect password')
+  })
+
   test('Should call findByEmail with correct e-mail', async () => {
     const { sut, accountRepositoryStub } = makeSut()
 
@@ -73,11 +85,11 @@ describe('Authenticate UseCase', () => {
     expect(findByEmailSpy).toHaveBeenCalledWith('any_email')
   })
 
-  test('Should call Encrypter with correct password', async () => {
+  test('Should call Encrypter parse method with correct password', async () => {
     const { sut, encrypterStub } = makeSut()
-    const encryptSpy = jest.spyOn(encrypterStub, 'encrypt')
+    const encryptSpy = jest.spyOn(encrypterStub, 'parse')
     await sut.auth(makeFakeAuthenticateData())
-    expect(encryptSpy).toHaveBeenCalledWith('any_password')
+    expect(encryptSpy).toHaveBeenCalledWith('any_password', 'hashed_password')
   })
 
   test('Should throw AccountRepository throws', async () => {
@@ -89,7 +101,7 @@ describe('Authenticate UseCase', () => {
 
   test('Should throw Encrypter throws', async () => {
     const { sut, encrypterStub } = makeSut()
-    jest.spyOn(encrypterStub, 'encrypt').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+    jest.spyOn(encrypterStub, 'parse').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
     const promise = sut.auth(makeFakeAuthenticateData())
     await expect(promise).rejects.toThrow()
   })
