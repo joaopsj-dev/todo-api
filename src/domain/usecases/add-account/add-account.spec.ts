@@ -32,6 +32,10 @@ const makeEncrypter = (): Encrypter => {
     async encrypt (data: string): Promise<string> {
       return new Promise(resolve => resolve('hashed_password'))
     }
+
+    async parse (data: string, encrypted: string): Promise<boolean> {
+      return new Promise(resolve => resolve(true))
+    }
   }
   return new EncryptStub()
 }
