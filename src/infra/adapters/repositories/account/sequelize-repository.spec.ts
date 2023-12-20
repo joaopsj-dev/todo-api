@@ -1,24 +1,11 @@
-import { sequelizeTest } from '../../../../test/sequelize/sequelize';
+import AccountModel from '../../../db/sequelize/models/Account';
 import { SequelizeAccountRepositoryAdapter } from './sequelize-repository';
-import { makeAccountModel } from '../../../../test/sequelize/models/account';
 
 const makeSut = (): SequelizeAccountRepositoryAdapter => {
-  return new SequelizeAccountRepositoryAdapter(makeAccountModel)
+  return new SequelizeAccountRepositoryAdapter(AccountModel)
 }
 
 describe('Account Sequelize Repository', () => {
-  beforeAll(async () => {
-    await sequelizeTest.authenticate()
-  })
-
-  afterAll(async () => {
-    await sequelizeTest.close()
-  })
-
-  afterEach(async () => {
-    await makeAccountModel.destroy({ where: {}, truncate: true })
-  })
-
   test('Should return an account on success', async () => {
     const sut = makeSut()
     const account = await sut.create({ id: 'valid_id', name: 'valid_name', email: 'valid_email', password: 'valid_password' })

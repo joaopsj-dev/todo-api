@@ -10,5 +10,6 @@ module.exports = {
   testEnvironment: 'node',
   transform: {
     '.+\\.ts$': 'ts-jest'
-  }
+  },
+  setupFilesAfterEnv: ['<rootDir>/src/test/setup.js']
 };

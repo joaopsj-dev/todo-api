@@ -5,7 +5,7 @@ import { JwtTokenAdapter } from '../../infra/adapters/token/jwt-token-adapter'
 import { ZodValidatorAdapter } from '../../infra/adapters/validator/zod-validator-adapter'
 import { LoginController } from '../../presentation/controllers/login/login'
 import { accountSchema } from '../zod/schemas/account-schema'
-import AccountModel from '../db/sequelize/models/Account'
+import AccountModel from '../../infra/db/sequelize/models/Account'
 
 export const makeLoginController = (): LoginController => {
   const accountRepository = new SequelizeAccountRepositoryAdapter(AccountModel)

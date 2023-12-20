@@ -1,4 +1,4 @@
-import { sequelize } from '../db/sequelize/sequelize'
+import { sequelize } from '../../infra/db/sequelize/sequelize'
 
 sequelize.authenticate()
   .then(async () => {
