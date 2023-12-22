@@ -1,5 +1,6 @@
 export interface Account {
   id: string
+  refreshToken: string
   name: string
   email: string
   password: string

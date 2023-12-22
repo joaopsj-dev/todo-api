@@ -8,6 +8,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.STRING,
       },
+      refreshToken: {
+        type: Sequelize.STRING
+      },
       name: {
         allowNull: false,
         type: Sequelize.STRING,
