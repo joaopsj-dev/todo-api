@@ -12,7 +12,9 @@ export interface TokenPayload {
 }
 
 export interface Token {
-  generate: (payload: any) => Promise<string>
+  generateAccessToken: (payload: any) => Promise<string>
+  parseAccessToken: (token: string) => Promise<Either<ParseTokenError, TokenPayload>>
 
-  parse: (token: string) => Promise<Either<ParseTokenError, TokenPayload>>
+  generateRefreshToken: (payload: any) => Promise<string>
+  parseRefreshToken: (token: string) => Promise<Either<ParseTokenError, TokenPayload>>
 }
