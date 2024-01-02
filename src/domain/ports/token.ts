@@ -11,10 +11,12 @@ export interface TokenPayload {
   createdIn: number
 }
 
-export interface Token {
-  generateAccessToken: (payload: any) => Promise<string>
-  parseAccessToken: (token: string) => Promise<Either<ParseTokenError, TokenPayload>>
+export interface GenerateOptions {
+  secretKey: string
+  expiresIn: string
+}
 
-  generateRefreshToken: (payload: any) => Promise<string>
-  parseRefreshToken: (token: string) => Promise<Either<ParseTokenError, TokenPayload>>
+export interface Token {
+  generate: (payload: any, generateOptions: GenerateOptions) => Promise<string>
+  parse: (token: string, secretKey: string) => Promise<Either<ParseTokenError, TokenPayload>>
 }
