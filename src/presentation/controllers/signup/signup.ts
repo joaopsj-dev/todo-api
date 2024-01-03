@@ -1,5 +1,6 @@
 import { type Validator, type Token, type Controller, type AddAccount, type HttpRequest, type HttpResponse } from './signup-protocols'
 import { badRequest, conflict, ok, serverError } from '../../helpers/http-helper'
+import token_protocols from '../../../domain/protocols/token'
 
 export class SignUpController implements Controller {
   constructor (
@@ -22,12 +23,20 @@ export class SignUpController implements Controller {
       }
 
       const accessToken = await this.token.generate({
-        id: account.id,
-        email: account.email
+        id: account.id
+      }, {
+        expiresIn: token_protocols.access_token_expires_in,
+        secretKey: token_protocols.accessToken_secret_key
       })
 
-      return ok({ accessToken })
+      const refreshToken = await this.token.generate({ id: account.id }, {
+        expiresIn: token_protocols.refresh_token_expires_in,
+        secretKey: token_protocols.refreshToken_secret_key
+      })
+
+      return ok({ accessToken, refreshToken })
     } catch (error) {
+      console.log(error);
       return serverError(error as any)
     }
   }

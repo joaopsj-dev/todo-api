@@ -8,15 +8,14 @@ import { accountSchema } from '../zod/schemas/account-schema'
 import AccountModel from '../../infra/db/sequelize/models/Account'
 
 export const makeLoginController = (): LoginController => {
+  const token = new JwtTokenAdapter()
+
   const accountRepository = new SequelizeAccountRepositoryAdapter(AccountModel)
   const encrypter = new BcryptEncrypterAdapter(12)
-  const authenticate = new Authenticate(accountRepository, encrypter)
+  const authenticate = new Authenticate(accountRepository, encrypter, token)
   //
   const loginSchema = accountSchema.pick({ email: true, password: true })
   const validator = new ZodValidatorAdapter(loginSchema)
   //
-  const secretKey = process.env.JWT_SECRET_KEY
-  const token = new JwtTokenAdapter(secretKey)
-
   return new LoginController(authenticate, validator, token)
 }

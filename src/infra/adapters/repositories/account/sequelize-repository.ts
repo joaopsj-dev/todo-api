@@ -16,4 +16,18 @@ export class SequelizeAccountRepositoryAdapter implements AccountRepository {
       where: { email }
     })
   }
+
+  async findById (id: string): Promise<Account> {
+    return await this.AccountModel.findOne({
+      where: { id }
+    })
+  }
+
+  async update (accountData: Account, accountId: string): Promise<Account> {
+    await this.AccountModel.update({ ...accountData }, {
+      where: { id: accountId }
+    })
+
+    return this.findById(accountId)
+  }
 }

@@ -1,5 +1,6 @@
 import { type Authenticate, type Validator, type Token, type Controller, type HttpRequest, type HttpResponse } from './login-protocols'
 import { badRequest, notFound, ok, serverError, unauthorized } from '../../helpers/http-helper'
+import token_protocols from '../../../domain/protocols/token'
 
 export class LoginController implements Controller {
   constructor (
@@ -26,14 +27,14 @@ export class LoginController implements Controller {
           : unauthorized({ message })
       }
 
-      const { id, email } = authenticateResponse.response
+      const { id, refreshToken } = authenticateResponse.response
 
-      const accessToken = await this.token.generate({
-        id,
-        email
+      const accessToken = await this.token.generate({ id }, {
+        expiresIn: token_protocols.access_token_expires_in,
+        secretKey: token_protocols.accessToken_secret_key
       })
 
-      return ok({ accessToken })
+      return ok({ accessToken, refreshToken })
     } catch (error) {
       return serverError(error as any)
     }

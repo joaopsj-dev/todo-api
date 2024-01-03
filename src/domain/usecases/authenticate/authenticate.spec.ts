@@ -1,8 +1,9 @@
 import { type Failure, type Success } from '../../protocols/either'
-import { type Account, type AccountRepository, Authenticate, type AuthenticateError, type Encrypter } from './authenticate-protocols'
+import { type Account, type AccountRepository, Authenticate, type AuthenticateError, type Encrypter, type Token } from './authenticate-protocols'
 
 const makeFakeAccount = (): Account => ({
   id: 'any_id',
+  refreshToken: 'any_refresh_token',
   name: 'any_name',
   email: 'any_email',
   password: 'hashed_password'
@@ -15,11 +16,19 @@ const makeFakeAuthenticateData = (): { email: string, password: string } => ({
 
 const makeAccountRepository = (): AccountRepository => {
   class AccountRepositoryStub implements AccountRepository {
-    async findByEmail (email: string): Promise<Account> {
+    async findByEmail (): Promise<Account> {
       return new Promise(resolve => resolve(makeFakeAccount()))
     }
 
-    async create (accountData: Account): Promise<Account> {
+    async findById (): Promise<Account> {
+      return new Promise(resolve => resolve(makeFakeAccount()))
+    }
+
+    async create (): Promise<Account> {
+      return new Promise(resolve => resolve(makeFakeAccount()))
+    }
+
+    async update (): Promise<Account> {
       return new Promise(resolve => resolve(makeFakeAccount()))
     }
   }
@@ -39,6 +48,19 @@ const makeEncrypter = (): Encrypter => {
   return new EncryptStub()
 }
 
+const makeTokenProvider = (): Token => {
+  class TokenProviderStub implements Token {
+    async generate (): Promise<string> {
+      return new Promise(resolve => resolve('token'))
+    }
+
+    async parse (): Promise<any> {
+      return new Promise(resolve => resolve(null))
+    }
+  }
+  return new TokenProviderStub()
+}
+
 interface SutTypes {
   sut: Authenticate
   accountRepositoryStub: AccountRepository
@@ -48,7 +70,8 @@ interface SutTypes {
 const makeSut = (): SutTypes => {
   const accountRepositoryStub = makeAccountRepository()
   const encrypterStub = makeEncrypter()
-  const sut = new Authenticate(accountRepositoryStub, encrypterStub)
+  const tokenStub = makeTokenProvider()
+  const sut = new Authenticate(accountRepositoryStub, encrypterStub, tokenStub)
 
   return {
     sut,

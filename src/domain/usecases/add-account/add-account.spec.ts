@@ -3,12 +3,14 @@ import { type Encrypter, type Account, type AccountRepository, type AddAccountDa
 
 const makeFakeAccount = (): Account => ({
   id: 'valid_id',
+  refreshToken: 'valid_refreshToken',
   name: 'valid_name',
   email: 'valid_email',
   password: 'hashed_password'
 })
 
 const makeFakeAddAccountData = (): AddAccountData => ({
+  refreshToken: 'valid_refreshToken',
   name: 'valid_name',
   email: 'valid_email',
   password: 'valid_password'
@@ -16,11 +18,19 @@ const makeFakeAddAccountData = (): AddAccountData => ({
 
 const makeAccountRepository = (): AccountRepository => {
   class AccountRepositoryStub implements AccountRepository {
-    async findByEmail (email: string): Promise<Account> {
+    async findByEmail (): Promise<Account> {
       return new Promise(resolve => resolve(null))
     }
 
-    async create (accountData: Account): Promise<Account> {
+    async findById (): Promise<Account> {
+      return new Promise(resolve => resolve(null))
+    }
+
+    async create (): Promise<Account> {
+      return new Promise(resolve => resolve(makeFakeAccount()))
+    }
+
+    async update (): Promise<Account> {
       return new Promise(resolve => resolve(makeFakeAccount()))
     }
   }

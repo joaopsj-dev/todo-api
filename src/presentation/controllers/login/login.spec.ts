@@ -14,6 +14,7 @@ const makeFakeRequest = (): HttpRequest => ({
 
 const makeFakeAccount = (): Account => ({
   id: 'valid_id',
+  refreshToken: 'valid_refreshToken',
   name: 'valid_name',
   email: 'valid_email',
   password: 'hashed_password'
@@ -39,11 +40,11 @@ const makeValidator = (): Validator => {
 
 const makeTokenProvider = (): Token => {
   class TokenProviderStub implements Token {
-    async generate (payload: any): Promise<string> {
+    async generate (): Promise<string> {
       return new Promise(resolve => resolve('token'))
     }
 
-    async parse (token: string): Promise<any> {
+    async parse (): Promise<any> {
       return new Promise(resolve => resolve(null))
     }
   }
@@ -147,9 +148,20 @@ describe('SignUpController', () => {
 
   test('Should call Generate Token with correct values', async () => {
     const { sut, tokenProviderStub } = makeSut()
-    const generateTokenSpy = jest.spyOn(tokenProviderStub, 'generate')
+
+    const accessTokenSpy = jest.spyOn(tokenProviderStub, 'generate')
+    const refreshTokenSpy = jest.spyOn(tokenProviderStub, 'generate')
+
     await sut.handle(makeFakeRequest())
-    expect(generateTokenSpy).toHaveBeenCalledWith({ id: 'valid_id', email: 'valid_email' })
+
+    expect(accessTokenSpy).toHaveBeenCalledWith({ id: 'valid_id' }, expect.objectContaining({
+      expiresIn: expect.any(String),
+      secretKey: expect.any(String)
+    }))
+    expect(refreshTokenSpy).toHaveBeenCalledWith({ id: 'valid_id' }, expect.objectContaining({
+      expiresIn: expect.any(String),
+      secretKey: expect.any(String)
+    }))
   })
 
   test('Should call Validator with correct values', async () => {
@@ -162,6 +174,9 @@ describe('SignUpController', () => {
   test('Should return 200 if valid data is provided', async () => {
     const { sut } = makeSut()
     const httpResponse = await sut.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(ok({ accessToken: 'token' }))
+    expect(httpResponse).toEqual(ok(expect.objectContaining({
+      accessToken: expect.any(String),
+      refreshToken: expect.any(String)
+    })))
   })
 })

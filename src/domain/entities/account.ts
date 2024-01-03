@@ -7,6 +7,7 @@ export interface Account {
 }
 
 export interface AddAccountData {
+  refreshToken: string
   name: string
   email: string
   password: string

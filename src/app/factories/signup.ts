@@ -14,8 +14,7 @@ export const makeSignUpController = (): SignUpController => {
   //
   const validator = new ZodValidatorAdapter(accountSchema)
   //
-  const secretKey = process.env.JWT_SECRET_KEY
-  const token = new JwtTokenAdapter(secretKey)
+  const token = new JwtTokenAdapter()
 
   return new SignUpController(addAccount, validator, token)
 }
