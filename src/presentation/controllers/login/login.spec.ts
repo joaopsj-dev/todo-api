@@ -1,23 +1,23 @@
 import { type Account } from '../../../domain/entities/account'
 import { type ValidateError } from '../../../domain/ports/validate'
-import { type Token, type Validator, type HttpRequest, type Authenticate, type AuthenticateError } from './login-protocols'
+import { type Token, type Validator, type HttpRequest, type Authenticate, type AuthenticateError, type ParseTokenError, type TokenPayload } from './login-protocols'
 import { success, type Either, failure, type Failure } from '../../../domain/protocols/either'
 import { LoginController } from './login'
 import { badRequest, notFound, ok, serverError, unauthorized } from '../../helpers/http-helper'
 
 const makeFakeRequest = (): HttpRequest => ({
   body: {
-    email: 'any_email@mail.com',
-    password: 'any_password'
+    email: 'valid_email@mail.com',
+    password: 'valid_password'
   }
 })
 
 const makeFakeAccount = (): Account => ({
-  id: 'valid_id',
-  refreshToken: 'valid_refreshToken',
-  name: 'valid_name',
-  email: 'valid_email',
-  password: 'hashed_password'
+  id: 'any_id',
+  refreshToken: 'any_refreshToken',
+  name: 'any_name',
+  email: 'any_email',
+  password: 'any_password'
 })
 
 const makeAuthenticate = (): Authenticate => {
@@ -31,7 +31,7 @@ const makeAuthenticate = (): Authenticate => {
 
 const makeValidator = (): Validator => {
   class ValidatorStub implements Validator {
-    async validate (data: any): Promise<Either<ValidateError, any>> {
+    async validate (): Promise<Either<ValidateError, any>> {
       return new Promise(resolve => resolve(success(true)))
     }
   }
@@ -44,9 +44,7 @@ const makeTokenProvider = (): Token => {
       return new Promise(resolve => resolve('token'))
     }
 
-    async parse (): Promise<any> {
-      return new Promise(resolve => resolve(null))
-    }
+    parse: (token: string, secretKey: string) => Promise<Either<ParseTokenError, TokenPayload>>
   }
   return new TokenProviderStub()
 }
@@ -74,16 +72,60 @@ const makeSut = (): SutTypes => {
 
 type FailureByAuthenticate = Failure<AuthenticateError, null>
 
-describe('SignUpController', () => {
+describe('LoginController', () => {
+  test('Should return 500 if Validator throws', async () => {
+    const { sut, validatorStub } = makeSut()
+
+    const fakeError = new Error()
+    jest.spyOn(validatorStub, 'validate').mockImplementationOnce(async () => {
+      return await new Promise((resolve, reject) => reject(fakeError))
+    })
+    const httpResponse = await sut.handle(makeFakeRequest())
+
+    expect(httpResponse).toEqual(serverError(fakeError))
+  })
+
+  test('Should call validate method with request body', async () => {
+    const { sut, validatorStub } = makeSut()
+
+    const validatorSpy = jest.spyOn(validatorStub, 'validate')
+    await sut.handle(makeFakeRequest())
+
+    expect(validatorSpy).toHaveBeenCalledWith(makeFakeRequest().body)
+  })
+
   test('Should return 400 if the parameters are not valid', async () => {
     const { sut, validatorStub } = makeSut()
+
     const validateError: ValidateError = [
       { paramName: 'email', message: 'email is required' },
       { paramName: 'password', message: 'password is required' }
     ]
     jest.spyOn(validatorStub, 'validate').mockReturnValueOnce(new Promise(resolve => resolve(failure(validateError))))
     const httpResponse = await sut.handle(makeFakeRequest())
+
     expect(httpResponse).toEqual(badRequest(validateError))
+  })
+
+  test('Should call Authenticate with correct values', async () => {
+    const { sut, authenticateStub } = makeSut()
+
+    const authSpy = jest.spyOn(authenticateStub, 'auth')
+    await sut.handle(makeFakeRequest())
+
+    expect(authSpy).toHaveBeenCalledWith(makeFakeRequest().body)
+  })
+
+  test('Should return 500 if Authenticate throws', async () => {
+    const { sut, authenticateStub } = makeSut()
+
+    const fakeError = new Error()
+    jest.spyOn(authenticateStub, 'auth').mockImplementationOnce(async () => {
+      return await new Promise((resolve, reject) => reject(fakeError))
+    })
+    const httpResponse = await sut.handle(makeFakeRequest())
+
+    expect(httpResponse).toEqual(serverError(fakeError))
   })
 
   test('Should return 404 if the user is not found', async () => {
@@ -91,8 +133,8 @@ describe('SignUpController', () => {
 
     const authenticateError = failure({ message: 'user not found' }) as FailureByAuthenticate
     jest.spyOn(authenticateStub, 'auth').mockReturnValueOnce(new Promise(resolve => resolve(authenticateError)))
-
     const httpResponse = await sut.handle(makeFakeRequest())
+
     expect(httpResponse).toEqual(notFound({ message: 'user not found' }))
   })
 
@@ -101,52 +143,24 @@ describe('SignUpController', () => {
 
     const authenticateError = failure({ message: 'incorrect password' }) as FailureByAuthenticate
     jest.spyOn(authenticateStub, 'auth').mockReturnValueOnce(new Promise(resolve => resolve(authenticateError)))
-
     const httpResponse = await sut.handle(makeFakeRequest())
+
     expect(httpResponse).toEqual(unauthorized({ message: 'incorrect password' }))
-  })
-
-  test('Should return 500 if Authenticate throws', async () => {
-    const { sut, authenticateStub } = makeSut()
-    const fakeError = new Error()
-    jest.spyOn(authenticateStub, 'auth').mockImplementationOnce(async () => {
-      return await new Promise((resolve, reject) => reject(fakeError))
-    })
-    const httpResponse = await sut.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(serverError(fakeError))
   })
 
   test('Should return 500 if TokenProvider throws', async () => {
     const { sut, tokenProviderStub } = makeSut()
+
     const fakeError = new Error()
     jest.spyOn(tokenProviderStub, 'generate').mockImplementationOnce(async () => {
       return await new Promise((resolve, reject) => reject(fakeError))
     })
     const httpResponse = await sut.handle(makeFakeRequest())
+
     expect(httpResponse).toEqual(serverError(fakeError))
   })
 
-  test('Should return 500 if Validator throws', async () => {
-    const { sut, validatorStub } = makeSut()
-    const fakeError = new Error()
-    jest.spyOn(validatorStub, 'validate').mockImplementationOnce(async () => {
-      return await new Promise((resolve, reject) => reject(fakeError))
-    })
-    const httpResponse = await sut.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(serverError(fakeError))
-  })
-
-  test('Should call Authenticate with correct values', async () => {
-    const { sut, authenticateStub } = makeSut()
-    const loginSpy = jest.spyOn(authenticateStub, 'auth')
-    await sut.handle(makeFakeRequest())
-    expect(loginSpy).toHaveBeenCalledWith({
-      email: 'any_email@mail.com',
-      password: 'any_password'
-    })
-  })
-
-  test('Should call Generate Token with correct values', async () => {
+  test('Should call Token generate with correct values', async () => {
     const { sut, tokenProviderStub } = makeSut()
 
     const accessTokenSpy = jest.spyOn(tokenProviderStub, 'generate')
@@ -154,26 +168,21 @@ describe('SignUpController', () => {
 
     await sut.handle(makeFakeRequest())
 
-    expect(accessTokenSpy).toHaveBeenCalledWith({ id: 'valid_id' }, expect.objectContaining({
+    expect(accessTokenSpy).toHaveBeenCalledWith({ id: 'any_id' }, expect.objectContaining({
       expiresIn: expect.any(String),
       secretKey: expect.any(String)
     }))
-    expect(refreshTokenSpy).toHaveBeenCalledWith({ id: 'valid_id' }, expect.objectContaining({
+    expect(refreshTokenSpy).toHaveBeenCalledWith({ id: 'any_id' }, expect.objectContaining({
       expiresIn: expect.any(String),
       secretKey: expect.any(String)
     }))
-  })
-
-  test('Should call Validator with correct values', async () => {
-    const { sut, validatorStub } = makeSut()
-    const validatorSpy = jest.spyOn(validatorStub, 'validate')
-    await sut.handle(makeFakeRequest())
-    expect(validatorSpy).toHaveBeenCalledWith(makeFakeRequest().body)
   })
 
   test('Should return 200 if valid data is provided', async () => {
     const { sut } = makeSut()
+
     const httpResponse = await sut.handle(makeFakeRequest())
+
     expect(httpResponse).toEqual(ok(expect.objectContaining({
       accessToken: expect.any(String),
       refreshToken: expect.any(String)
