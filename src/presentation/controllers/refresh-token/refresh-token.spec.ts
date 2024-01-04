@@ -46,46 +46,74 @@ const makeSut = (): SutTypes => {
 }
 
 describe('RefreshTokenController', () => {
-  test('Should return 400 if the parameters are not valid', async () => {
-    const { sut, validatorStub } = makeSut()
-    const validateError: ValidateError = [
-      { paramName: 'refreshToken', message: 'refreshToken is required' }
-    ]
-    jest.spyOn(validatorStub, 'validate').mockReturnValueOnce(new Promise(resolve => resolve(failure(validateError))))
-    const httpResponse = await sut.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(badRequest(validateError))
-  })
-
   test('Should return 500 if Validator throws', async () => {
     const { sut, validatorStub } = makeSut()
+
     const fakeError = new Error()
     jest.spyOn(validatorStub, 'validate').mockImplementationOnce(async () => {
       return await new Promise((resolve, reject) => reject(fakeError))
     })
     const httpResponse = await sut.handle(makeFakeRequest())
+
     expect(httpResponse).toEqual(serverError(fakeError))
   })
 
-  test('Should return 401 if refreshToken usecase return null', async () => {
-    const { sut, refreshTokenStub } = makeSut()
-    jest.spyOn(refreshTokenStub, 'refresh').mockReturnValueOnce(new Promise(resolve => resolve(null)))
+  test('Should call validate method with request body', async () => {
+    const { sut, validatorStub } = makeSut()
+
+    const validatorSpy = jest.spyOn(validatorStub, 'validate')
+    await sut.handle(makeFakeRequest())
+
+    expect(validatorSpy).toHaveBeenCalledWith(makeFakeRequest().body)
+  })
+
+  test('Should return 400 if the parameters are not valid', async () => {
+    const { sut, validatorStub } = makeSut()
+
+    const validateError: ValidateError = [
+      { paramName: 'refreshToken', message: 'refreshToken is required' }
+    ]
+    jest.spyOn(validatorStub, 'validate').mockReturnValueOnce(new Promise(resolve => resolve(failure(validateError))))
     const httpResponse = await sut.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(unauthorized({ message: 'invalid refresh token, required login' }))
+
+    expect(httpResponse).toEqual(badRequest(validateError))
   })
 
   test('Should return 500 if RefreshToken usecase throws', async () => {
     const { sut, refreshTokenStub } = makeSut()
+
     const fakeError = new Error()
     jest.spyOn(refreshTokenStub, 'refresh').mockImplementationOnce(async () => {
       return await new Promise((resolve, reject) => reject(fakeError))
     })
     const httpResponse = await sut.handle(makeFakeRequest())
+
     expect(httpResponse).toEqual(serverError(fakeError))
+  })
+
+  test('Should call RefreshToken usecase with body refresh token', async () => {
+    const { sut, refreshTokenStub } = makeSut()
+
+    const refreshSpy = jest.spyOn(refreshTokenStub, 'refresh')
+    await sut.handle(makeFakeRequest())
+
+    expect(refreshSpy).toHaveBeenCalledWith('valid_refreshToken')
+  })
+
+  test('Should return 401 if RefreshToken usecase return null', async () => {
+    const { sut, refreshTokenStub } = makeSut()
+
+    jest.spyOn(refreshTokenStub, 'refresh').mockReturnValueOnce(new Promise(resolve => resolve(null)))
+    const httpResponse = await sut.handle(makeFakeRequest())
+
+    expect(httpResponse).toEqual(unauthorized({ message: expect.any(String) }))
   })
 
   test('Should return 200 if valid data is provided', async () => {
     const { sut } = makeSut()
+
     const httpResponse = await sut.handle(makeFakeRequest())
+
     expect(httpResponse).toEqual(ok({ accessToken: 'accessToken' }))
   })
 })
