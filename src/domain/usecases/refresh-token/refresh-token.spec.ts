@@ -5,19 +5,23 @@ import { failure, success } from '../../protocols/either'
 
 const makeFakeAccount = (): Account => ({
   id: 'any_id',
-  refreshToken: 'any_refresh_token',
+  refreshToken: 'any_account_refreshToken',
   name: 'any_name',
   email: 'any_email',
-  password: 'hashed_password'
+  password: 'any_password'
 })
 
 const makeAccountRepository = (): AccountRepository => {
-  class AccountRepositoryStub {
+  class AccountRepositoryStub implements AccountRepository {
     async findById (): Promise<Account> {
       return new Promise(resolve => resolve(makeFakeAccount()))
     }
+
+    findByEmail: (email: string) => Promise<Account>
+    create: (accountData: Account) => Promise<Account>
+    update: (accountData: Account, accountId: string) => Promise<Account>
   }
-  return new AccountRepositoryStub() as unknown as AccountRepository
+  return new AccountRepositoryStub()
 }
 
 const makeTokenProvider = (): Token => {
@@ -27,7 +31,7 @@ const makeTokenProvider = (): Token => {
     }
 
     async parse (): Promise<any> {
-      return new Promise(resolve => resolve(success({ payload: { id: '' }, expiresIn: 0, createdIn: 0 })))
+      return new Promise(resolve => resolve(success({ payload: { id: 'any_id' }, expiresIn: 0, createdIn: 0 })))
     }
   }
   return new TokenProviderStub()
@@ -51,21 +55,50 @@ const makeSut = (): SutTypes => {
   }
 }
 
-describe('Authenticate UseCase', () => {
+describe('RefreshToken UseCase', () => {
+  test('Should throw Token throws', async () => {
+    const { sut, tokenStub } = makeSut()
+
+    jest.spyOn(tokenStub, 'parse').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+    const promise = sut.refresh('any_refreshToken')
+
+    await expect(promise).rejects.toThrow()
+  })
+
+  test('Should call Token parse with correct values', async () => {
+    const { sut, tokenStub } = makeSut()
+
+    const tokenParseSpy = jest.spyOn(tokenStub, 'parse')
+    await sut.refresh('any_refreshToken')
+
+    expect(tokenParseSpy).toHaveBeenCalledWith('any_refreshToken', expect.any(String));
+  })
+
   test('Should return a null if invalid refreshToken', async () => {
     const { sut, tokenStub } = makeSut()
 
     jest.spyOn(tokenStub, 'parse').mockReturnValueOnce(new Promise(resolve => resolve(failure(null))))
     const response = await sut.refresh('invalid_refreshToken')
+
     expect(response).toBeNull()
   })
 
-  test('Should call token parse with correct value', async () => {
-    const { sut, tokenStub } = makeSut()
+  test('Should throw AccountRepository throws', async () => {
+    const { sut, accountRepositoryStub } = makeSut()
 
-    const tokenParseSpy = jest.spyOn(tokenStub, 'parse')
+    jest.spyOn(accountRepositoryStub, 'findById').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+    const promise = sut.refresh('any_refreshToken')
+
+    await expect(promise).rejects.toThrow()
+  })
+
+  test('Should call findById with correct payload', async () => {
+    const { sut, accountRepositoryStub } = makeSut()
+
+    const findByIdSpy = jest.spyOn(accountRepositoryStub, 'findById')
     await sut.refresh('any_refreshToken')
-    expect(tokenParseSpy).toHaveBeenCalledWith('any_refreshToken', expect.any(String));
+
+    expect(findByIdSpy).toHaveBeenCalledWith('any_id')
   })
 
   test('Should return a null if account with received token is not found', async () => {
@@ -73,24 +106,27 @@ describe('Authenticate UseCase', () => {
 
     jest.spyOn(accountRepositoryStub, 'findById').mockReturnValueOnce(new Promise(resolve => resolve(null)))
     const response = await sut.refresh('invalid_refreshToken')
+
     expect(response).toBeNull()
   })
 
-  test('Should call token parse with found account refresh token', async () => {
+  test('Should call Token parse with found account refresh token', async () => {
     const { sut, tokenStub } = makeSut()
 
     const tokenParseSpy = jest.spyOn(tokenStub, 'parse')
-    await sut.refresh('unknown_refreshToken')
-    expect(tokenParseSpy.mock.calls[1]).toEqual(['any_refresh_token', expect.any(String)]);
+    await sut.refresh('any_refreshToken')
+
+    expect(tokenParseSpy.mock.calls[1]).toEqual(['any_account_refreshToken', expect.any(String)]);
   })
 
   test('Should return a null if account refreshToken is expired', async () => {
     const { sut, tokenStub } = makeSut()
 
     jest.spyOn(tokenStub, 'parse')
-      .mockReturnValueOnce(new Promise(resolve => resolve(success({ payload: { id: '' }, expiresIn: 0, createdIn: 0 }))))
+      .mockReturnValueOnce(new Promise(resolve => resolve(success({ payload: { id: 'any_id' }, expiresIn: 0, createdIn: 0 }))))
       .mockReturnValueOnce(new Promise(resolve => resolve(failure(null))))
     const response = await sut.refresh('any_refreshToken')
+
     expect(response).toBeNull()
   })
 
@@ -101,15 +137,17 @@ describe('Authenticate UseCase', () => {
       .mockReturnValueOnce(new Promise(resolve => resolve(success({ payload: { id: '' }, expiresIn: 0, createdIn: 0 }))))
       .mockReturnValueOnce(new Promise(resolve => resolve(success({ payload: { id: '' }, expiresIn: 1, createdIn: 0 }))))
     const response = await sut.refresh('old_refreshToken')
+
     expect(response).toBeNull()
   })
 
-  test('Should call token generate with correct values', async () => {
+  test('Should call tToken generate with correct values', async () => {
     const { sut, tokenStub } = makeSut()
 
     const tokenGenerateSpy = jest.spyOn(tokenStub, 'generate')
     await sut.refresh('any_refreshToken')
-    expect(tokenGenerateSpy).toHaveBeenCalledWith({ id: '' }, expect.objectContaining({
+
+    expect(tokenGenerateSpy).toHaveBeenCalledWith({ id: 'any_id' }, expect.objectContaining({
       expiresIn: expect.any(String),
       secretKey: expect.any(String)
     }))
@@ -119,6 +157,7 @@ describe('Authenticate UseCase', () => {
     const { sut } = makeSut()
 
     const response = await sut.refresh('valid_refreshToken')
+
     expect(response).toBe('accessToken')
   })
 })
