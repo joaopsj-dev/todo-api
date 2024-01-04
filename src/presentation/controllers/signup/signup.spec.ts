@@ -7,18 +7,18 @@ import { badRequest, conflict, ok, serverError } from '../../helpers/http-helper
 
 const makeFakeRequest = (): HttpRequest => ({
   body: {
-    name: 'any_name',
-    email: 'any_email@mail.com',
-    password: 'any_password'
+    name: 'valid_name',
+    email: 'valid_email@mail.com',
+    password: 'valid_password'
   }
 })
 
 const makeFakeAccount = (): Account => ({
-  id: 'valid_id',
-  refreshToken: null,
-  name: 'valid_name',
-  email: 'valid_email',
-  password: 'hashed_password'
+  id: 'any_id',
+  refreshToken: 'any_refreshToken',
+  name: 'any_name',
+  email: 'any_email',
+  password: 'any_password'
 })
 
 const makeAddAccount = (): AddAccount => {
@@ -74,8 +74,30 @@ const makeSut = (): SutTypes => {
 }
 
 describe('SignUpController', () => {
+  test('Should return 500 if Validator throws', async () => {
+    const { sut, validatorStub } = makeSut()
+
+    const fakeError = new Error()
+    jest.spyOn(validatorStub, 'validate').mockImplementationOnce(async () => {
+      return await new Promise((resolve, reject) => reject(fakeError))
+    })
+    const httpResponse = await sut.handle(makeFakeRequest())
+
+    expect(httpResponse).toEqual(serverError(fakeError))
+  })
+
+  test('Should call validate method with request body', async () => {
+    const { sut, validatorStub } = makeSut()
+
+    const validatorSpy = jest.spyOn(validatorStub, 'validate')
+    await sut.handle(makeFakeRequest())
+
+    expect(validatorSpy).toHaveBeenCalledWith(makeFakeRequest().body)
+  })
+
   test('Should return 400 if the parameters are not valid', async () => {
     const { sut, validatorStub } = makeSut()
+
     const validateError: ValidateError = [
       { paramName: 'name', message: 'name is required' },
       { paramName: 'email', message: 'email is required' },
@@ -83,59 +105,55 @@ describe('SignUpController', () => {
     ]
     jest.spyOn(validatorStub, 'validate').mockReturnValueOnce(new Promise(resolve => resolve(failure(validateError))))
     const httpResponse = await sut.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(badRequest(validateError))
-  })
 
-  test('Should return 409 if email already exists', async () => {
-    const { sut, addAccountStub } = makeSut()
-    jest.spyOn(addAccountStub, 'add').mockReturnValueOnce(null)
-    const httpResponse = await sut.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(conflict({ message: 'email already exists' }))
+    expect(httpResponse).toEqual(badRequest(validateError))
   })
 
   test('Should return 500 if AddAccount throws', async () => {
     const { sut, addAccountStub } = makeSut()
+
     const fakeError = new Error()
     jest.spyOn(addAccountStub, 'add').mockImplementationOnce(async () => {
       return await new Promise((resolve, reject) => reject(fakeError))
     })
     const httpResponse = await sut.handle(makeFakeRequest())
+
     expect(httpResponse).toEqual(serverError(fakeError))
   })
 
-  test('Should return 500 if TokenProvider throws', async () => {
+  test('Should call AddAccount with request body', async () => {
+    const { sut, addAccountStub } = makeSut()
+
+    const addSpy = jest.spyOn(addAccountStub, 'add')
+    await sut.handle(makeFakeRequest())
+
+    expect(addSpy).toHaveBeenCalledWith(makeFakeRequest().body)
+  })
+
+  test('Should return 409 if AddAccount returns null', async () => {
+    const { sut, addAccountStub } = makeSut()
+
+    jest.spyOn(addAccountStub, 'add').mockReturnValueOnce(null)
+    const httpResponse = await sut.handle(makeFakeRequest())
+
+    expect(httpResponse).toEqual(conflict({ message: 'email already exists' }))
+  })
+
+  test('Should return 500 if Token generate throws', async () => {
     const { sut, tokenProviderStub } = makeSut()
+
     const fakeError = new Error()
     jest.spyOn(tokenProviderStub, 'generate').mockImplementationOnce(async () => {
       return await new Promise((resolve, reject) => reject(fakeError))
     })
     const httpResponse = await sut.handle(makeFakeRequest())
+
     expect(httpResponse).toEqual(serverError(fakeError))
   })
 
-  test('Should return 500 if Validator throws', async () => {
-    const { sut, validatorStub } = makeSut()
-    const fakeError = new Error()
-    jest.spyOn(validatorStub, 'validate').mockImplementationOnce(async () => {
-      return await new Promise((resolve, reject) => reject(fakeError))
-    })
-    const httpResponse = await sut.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(serverError(fakeError))
-  })
-
-  test('Should call AddAccount with correct values', async () => {
-    const { sut, addAccountStub } = makeSut()
-    const signUpSpy = jest.spyOn(addAccountStub, 'add')
-    await sut.handle(makeFakeRequest())
-    expect(signUpSpy).toHaveBeenCalledWith({
-      name: 'any_name',
-      email: 'any_email@mail.com',
-      password: 'any_password'
-    })
-  })
-
-  test('Should call Generate Token with correct values', async () => {
+  test('Should call Token generate with correct values', async () => {
     const { sut, tokenProviderStub, addAccountStub } = makeSut()
+
     jest.spyOn(addAccountStub, 'add').mockReturnValueOnce(new Promise(resolve => resolve(makeFakeAccount())))
 
     const accessTokenSpy = jest.spyOn(tokenProviderStub, 'generate')
@@ -143,21 +161,14 @@ describe('SignUpController', () => {
 
     await sut.handle(makeFakeRequest())
 
-    expect(accessTokenSpy).toHaveBeenCalledWith({ id: 'valid_id' }, expect.objectContaining({
+    expect(accessTokenSpy).toHaveBeenCalledWith({ id: 'any_id' }, expect.objectContaining({
       expiresIn: expect.any(String),
       secretKey: expect.any(String)
     }))
-    expect(refreshTokenSpy).toHaveBeenCalledWith({ id: 'valid_id' }, expect.objectContaining({
+    expect(refreshTokenSpy).toHaveBeenCalledWith({ id: 'any_id' }, expect.objectContaining({
       expiresIn: expect.any(String),
       secretKey: expect.any(String)
     }))
-  })
-
-  test('Should call Validator with correct values', async () => {
-    const { sut, validatorStub } = makeSut()
-    const validatorSpy = jest.spyOn(validatorStub, 'validate')
-    await sut.handle(makeFakeRequest())
-    expect(validatorSpy).toHaveBeenCalledWith(makeFakeRequest().body)
   })
 
   test('Should return 200 if valid data is provided', async () => {
