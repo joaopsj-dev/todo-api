@@ -3,16 +3,13 @@ import { type Success, type Failure } from '../../../domain/protocols/either'
 import { type ZodSchema, z } from 'zod'
 import { ZodValidatorAdapter } from './zod-validator-adapter'
 
-type SuccessByValidate = Success<null, void>
-type FailureByValidate = Failure<ValidateError, null>
-
-const fakeSchema = z.object({
+const makeFakeAccountSchema = z.object({
   name: z.string().min(3),
   email: z.string().email(),
   password: z.string().min(6)
 })
 
-const makeValidData = (): z.infer<typeof fakeSchema> => ({
+const makeFakeAccountData = (): z.infer<typeof makeFakeAccountSchema> => ({
   name: 'valid_name',
   email: 'valid_email@email.com',
   password: 'valid_password'
@@ -24,7 +21,7 @@ interface SutTypes {
 }
 
 const makeSut = (): SutTypes => {
-  const schemaStub = fakeSchema
+  const schemaStub = makeFakeAccountSchema
   const sut = new ZodValidatorAdapter(schemaStub)
 
   return {
@@ -33,27 +30,37 @@ const makeSut = (): SutTypes => {
   }
 }
 
-describe('ZodValidatorAdapter', () => {
-  test('Should returns an correct error if failure', async () => {
-    const { sut } = makeSut()
-    const validatedError = await sut.validate({}) as FailureByValidate
+type SuccessByValidate = Success<null, void>
+type FailureByValidate = Failure<ValidateError, null>
 
-    validatedError.error.forEach(err => {
-      expect(err).toHaveProperty('paramName')
-      expect(err.message).toBe('Required')
+describe('ZodValidatorAdapter', () => {
+  test('Should return a correct error on failure', async () => {
+    const { sut } = makeSut()
+
+    const { error } = await sut.validate({}) as FailureByValidate
+
+    error.forEach(err => {
+      expect(err).toEqual(expect.objectContaining({
+        paramName: expect.any(String),
+        message: 'Required'
+      }))
     })
   })
 
-  test('Should returns an void if success', async () => {
+  test('Should return a void on success', async () => {
     const { sut } = makeSut()
-    const validatedResponse = await sut.validate(makeValidData()) as SuccessByValidate
+
+    const validatedResponse = await sut.validate(makeFakeAccountData()) as SuccessByValidate
+
     expect(validatedResponse.response).toBeUndefined()
   })
 
   test('Should call parse with correct values', async () => {
     const { sut, schemaStub } = makeSut()
+
     const schemaSpy = jest.spyOn(schemaStub, 'parse')
-    await sut.validate(makeValidData())
-    expect(schemaSpy).toHaveBeenCalledWith(makeValidData())
+    await sut.validate(makeFakeAccountData())
+
+    expect(schemaSpy).toHaveBeenCalledWith(makeFakeAccountData())
   })
 })
