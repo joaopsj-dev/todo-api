@@ -1,55 +1,68 @@
-import { type ParseTokenError, type TokenPayload } from '../../../domain/ports/token'
+import { type TokenPayload, type GenerateOptions, type ParseTokenError } from '../../../domain/ports/token'
 import { type Success, type Failure } from '../../../domain/protocols/either'
 import { JwtTokenAdapter } from './jwt-token-adapter'
+import jwt from 'jsonwebtoken'
+
+const makeFakeGenerateOptions = (): GenerateOptions => ({
+  secretKey: 'any_secretKey',
+  expiresIn: '10s'
+})
+
+const makeFakePayload = (): any => ({
+  id: 'any_id'
+})
+
+const makeSut = (): JwtTokenAdapter => {
+  const sut = new JwtTokenAdapter()
+
+  return sut
+}
 
 type SuccessByParse = Success<null, TokenPayload>
 type FailureByParse = Failure<ParseTokenError, null>
 
-interface SutTypes {
-  sut: JwtTokenAdapter
-  makeToken: string
-  makeParsedToken: TokenPayload
-}
-
-const makeSut = async (): Promise<SutTypes> => {
-  const sut = new JwtTokenAdapter()
-  const makeToken = await sut.generate({ id: 'any_id' }, { expiresIn: '20m', secretKey: 'any_secret_key' })
-  const { response: makeParsedToken } = await sut.parse(makeToken, 'any_secret_key') as SuccessByParse
-
-  return {
-    sut,
-    makeToken,
-    makeParsedToken
-  }
-}
-
 describe('JwtTokenAdapter', () => {
-  test('Parsed should returns an failure if invalid token', async () => {
-    const { sut } = await makeSut()
-    const accessTokenError = await sut.parse('invalid_token', 'any_secret_key') as FailureByParse
+  test('Should call sign method with correct values', async () => {
+    const sut = makeSut()
 
-    expect(accessTokenError.error).toEqual({ name: 'JsonWebTokenError', message: 'jwt malformed' })
+    const jwtSpy = jest.spyOn(jwt, 'sign')
+    await sut.generate(makeFakePayload(), makeFakeGenerateOptions())
+
+    expect(jwtSpy).toHaveBeenCalledWith(
+      { id: 'any_id' },
+      'any_secretKey',
+      { expiresIn: '10s' }
+    )
   })
 
-  test('Should returns an correct payload if parsed is success', async () => {
-    const { makeParsedToken } = await makeSut()
+  test('Should return a valid token on generate success', async () => {
+    const sut = makeSut()
 
-    expect(makeParsedToken).toEqual(expect.objectContaining({
+    const token = await sut.generate(makeFakePayload(), makeFakeGenerateOptions())
+
+    expect(token.split('.').length - 1).toBe(2)
+  })
+
+  test('Parsed should returns an failure if invalid token', async () => {
+    const sut = makeSut()
+    const accessTokenError = await sut.parse('invalid_token', 'any_secret_key') as FailureByParse
+
+    expect(accessTokenError.error).toEqual(expect.objectContaining({
+      name: expect.any(String),
+      message: expect.any(String)
+    }))
+  })
+
+  test('Should returns an correct payload on parsed success', async () => {
+    const sut = makeSut()
+
+    const token = await sut.generate(makeFakePayload(), makeFakeGenerateOptions())
+    const parsedToken = await sut.parse(token, 'any_secretKey') as SuccessByParse
+
+    expect(parsedToken.response).toEqual(expect.objectContaining({
       payload: { id: 'any_id' },
       expiresIn: expect.any(Number),
       createdIn: expect.any(Number)
     }))
-  })
-
-  test('Should return a valid token if everything is correct', async () => {
-    const { makeToken } = await makeSut()
-
-    expect(makeToken.split('.').length - 1).toBe(2)
-  })
-
-  test('The payload returned from parse must be the same as the one passed to generate', async () => {
-    const { makeParsedToken } = await makeSut()
-
-    expect(makeParsedToken.payload).toEqual({ id: 'any_id' })
   })
 })
