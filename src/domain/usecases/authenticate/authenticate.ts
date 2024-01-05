@@ -31,8 +31,7 @@ export class Authenticate {
     })
 
     const account = await this.accountRepository.update({
-      refreshToken,
-      ...accountByEmail
+      refreshToken
     }, accountByEmail.id)
 
     return success(account)
