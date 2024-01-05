@@ -1,5 +1,5 @@
 import { type ModelCtor } from 'sequelize'
-import { type Account } from '../../../../domain/entities/account';
+import { type AddAccountData, type Account } from '../../../../domain/entities/account';
 import { type AccountRepository } from '../../../../domain/ports/account-repository'
 
 export class SequelizeAccountRepositoryAdapter implements AccountRepository {
@@ -23,7 +23,7 @@ export class SequelizeAccountRepositoryAdapter implements AccountRepository {
     })
   }
 
-  async update (accountData: Account, accountId: string): Promise<Account> {
+  async update (accountData: Partial<AddAccountData>, accountId: string): Promise<Account> {
     await this.AccountModel.update({ ...accountData }, {
       where: { id: accountId }
     })

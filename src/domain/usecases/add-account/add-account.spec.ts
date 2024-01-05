@@ -27,7 +27,7 @@ const makeAccountRepository = (): AccountRepository => {
     }
 
     findById: (id: string) => Promise<Account>
-    update: (accountData: Account, accountId: string) => Promise<Account>
+    update: (accountData: Partial<AddAccountData>, accountId: string) => Promise<Account>
   }
 
   return new AccountRepositoryStub()

@@ -1,5 +1,5 @@
 import { type Token, type AccountRepository } from './refresh-token-protocols'
-import { type Account } from '../../entities/account'
+import { type AddAccountData, type Account } from '../../entities/account'
 import { RefreshToken } from './refresh-token'
 import { failure, success } from '../../protocols/either'
 
@@ -19,7 +19,7 @@ const makeAccountRepository = (): AccountRepository => {
 
     findByEmail: (email: string) => Promise<Account>
     create: (accountData: Account) => Promise<Account>
-    update: (accountData: Account, accountId: string) => Promise<Account>
+    update: (accountData: Partial<AddAccountData>, accountId: string) => Promise<Account>
   }
   return new AccountRepositoryStub()
 }

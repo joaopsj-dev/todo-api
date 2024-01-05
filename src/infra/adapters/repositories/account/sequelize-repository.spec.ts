@@ -45,7 +45,7 @@ describe('Account Sequelize Repository', () => {
 
     await sut.create({ id: 'valid_id', refreshToken: 'valid_refreshToken', name: 'valid_name', email: 'valid_email', password: 'valid_password' })
     const updatedAccount = await sut.update(
-      { id: 'valid_id', refreshToken: 'valid_refreshToken', name: 'new_name', email: 'valid_email', password: 'valid_password' },
+      { name: 'new_name' },
       'valid_id'
     )
 
