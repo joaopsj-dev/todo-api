@@ -136,6 +136,18 @@ describe('Authenticate UseCase', () => {
     await expect(promise).rejects.toThrow()
   })
 
+  test('Should call Token generate method with correct values', async () => {
+    const { sut, tokenStub } = makeSut()
+
+    const tokenSpy = jest.spyOn(tokenStub, 'generate')
+    await sut.auth(makeFakeAuthenticateData())
+
+    expect(tokenSpy).toHaveBeenCalledWith({ id: 'any_id' }, expect.objectContaining({
+      expiresIn: expect.any(String),
+      secretKey: expect.any(String)
+    }))
+  })
+
   test('Should return a account if on success', async () => {
     const { sut } = makeSut()
 
