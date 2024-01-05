@@ -106,8 +106,10 @@ describe('Authenticate UseCase', () => {
 
   test('Should throw Encrypter throws', async () => {
     const { sut, encrypterStub } = makeSut()
+
     jest.spyOn(encrypterStub, 'parse').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
     const promise = sut.auth(makeFakeAuthenticateData())
+
     await expect(promise).rejects.toThrow()
   })
 
@@ -131,8 +133,10 @@ describe('Authenticate UseCase', () => {
 
   test('Should throw Token throws', async () => {
     const { sut, tokenStub } = makeSut()
+
     jest.spyOn(tokenStub, 'generate').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
     const promise = sut.auth(makeFakeAuthenticateData())
+
     await expect(promise).rejects.toThrow()
   })
 
@@ -155,6 +159,18 @@ describe('Authenticate UseCase', () => {
     await sut.auth(makeFakeAuthenticateData())
 
     expect(updateSpy).toHaveBeenCalledWith({ refreshToken: 'token' }, 'any_id')
+  })
+
+  test('Should update account refresh token', async () => {
+    const { sut, accountRepositoryStub } = makeSut()
+
+    jest.spyOn(accountRepositoryStub, 'update').mockImplementationOnce(async ({ refreshToken }) => ({
+      ...makeFakeAccount(),
+      refreshToken
+    }));
+    const { response: account } = await sut.auth(makeFakeAuthenticateData()) as SuccessByAuthenticate
+
+    expect(account.refreshToken).toBe('token')
   })
 
   test('Should return a account if on success', async () => {
