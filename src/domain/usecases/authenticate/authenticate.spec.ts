@@ -148,6 +148,15 @@ describe('Authenticate UseCase', () => {
     }))
   })
 
+  test('Should call AccountRepository update method with correct values', async () => {
+    const { sut, accountRepositoryStub } = makeSut()
+
+    const updateSpy = jest.spyOn(accountRepositoryStub, 'update')
+    await sut.auth(makeFakeAuthenticateData())
+
+    expect(updateSpy).toHaveBeenCalledWith({ refreshToken: 'token' }, 'any_id')
+  })
+
   test('Should return a account if on success', async () => {
     const { sut } = makeSut()
 
