@@ -56,6 +56,7 @@ interface SutTypes {
   sut: Authenticate
   accountRepositoryStub: AccountRepository
   encrypterStub: Encrypter
+  tokenStub: Token
 }
 
 const makeSut = (): SutTypes => {
@@ -67,7 +68,8 @@ const makeSut = (): SutTypes => {
   return {
     sut,
     accountRepositoryStub,
-    encrypterStub
+    encrypterStub,
+    tokenStub
   }
 }
 
@@ -75,15 +77,6 @@ type SuccessByAuthenticate = Success<null, Account>
 type FailureByAuthenticate = Failure<AuthenticateError, null>
 
 describe('Authenticate UseCase', () => {
-  test('Should call findByEmail with correct e-mail', async () => {
-    const { sut, accountRepositoryStub } = makeSut()
-
-    const findByEmailSpy = jest.spyOn(accountRepositoryStub, 'findByEmail')
-    await sut.auth(makeFakeAuthenticateData())
-
-    expect(findByEmailSpy).toHaveBeenCalledWith('valid_email')
-  })
-
   test('Should throw AccountRepository throws', async () => {
     const { sut, accountRepositoryStub } = makeSut()
 
@@ -91,6 +84,15 @@ describe('Authenticate UseCase', () => {
     const promise = sut.auth(makeFakeAuthenticateData())
 
     await expect(promise).rejects.toThrow()
+  })
+
+  test('Should call findByEmail with correct e-mail', async () => {
+    const { sut, accountRepositoryStub } = makeSut()
+
+    const findByEmailSpy = jest.spyOn(accountRepositoryStub, 'findByEmail')
+    await sut.auth(makeFakeAuthenticateData())
+
+    expect(findByEmailSpy).toHaveBeenCalledWith('valid_email')
   })
 
   test('Should return a failure if there is no user with the email provided', async () => {
@@ -102,6 +104,13 @@ describe('Authenticate UseCase', () => {
     expect(response.error.message).toStrictEqual(expect.any(String))
   })
 
+  test('Should throw Encrypter throws', async () => {
+    const { sut, encrypterStub } = makeSut()
+    jest.spyOn(encrypterStub, 'parse').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+    const promise = sut.auth(makeFakeAuthenticateData())
+    await expect(promise).rejects.toThrow()
+  })
+
   test('Should call Encrypter parse method with correct password', async () => {
     const { sut, encrypterStub } = makeSut()
 
@@ -111,13 +120,6 @@ describe('Authenticate UseCase', () => {
     expect(encryptSpy).toHaveBeenCalledWith('valid_password', 'any_password')
   })
 
-  test('Should throw Encrypter throws', async () => {
-    const { sut, encrypterStub } = makeSut()
-    jest.spyOn(encrypterStub, 'parse').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
-    const promise = sut.auth(makeFakeAuthenticateData())
-    await expect(promise).rejects.toThrow()
-  })
-
   test('Should return a failure if incorrect password', async () => {
     const { sut, encrypterStub } = makeSut()
 
@@ -125,6 +127,13 @@ describe('Authenticate UseCase', () => {
     const response = await sut.auth(makeFakeAuthenticateData()) as FailureByAuthenticate
 
     expect(response.error.message).toStrictEqual(expect.any(String))
+  })
+
+  test('Should throw Token throws', async () => {
+    const { sut, tokenStub } = makeSut()
+    jest.spyOn(tokenStub, 'generate').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+    const promise = sut.auth(makeFakeAuthenticateData())
+    await expect(promise).rejects.toThrow()
   })
 
   test('Should return a account if on success', async () => {
