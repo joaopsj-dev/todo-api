@@ -136,4 +136,12 @@ describe('SendRecoverEmail usecase', () => {
       html: expect.any(String)
     }))
   })
+
+  test('Should return a true on success', async () => {
+    const { sut } = makeSut()
+
+    const response = await sut.send('valid_email')
+
+    expect(response).toBe(true)
+  })
 })

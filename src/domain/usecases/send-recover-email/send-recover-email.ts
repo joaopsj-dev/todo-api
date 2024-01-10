@@ -26,5 +26,6 @@ export class SendRecoverEmail {
       subject: 'Token de Recuperação de Senha',
       html: recoverPasswordHtml.replace('{TOKEN}', recoverToken)
     })
+    return true
   }
 }
