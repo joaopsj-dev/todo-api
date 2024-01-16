@@ -17,7 +17,7 @@ const makeFakeRequest = (): HttpRequest => ({
     password: 'valid_password'
   },
   headers: {
-    authorization: 'valid_recoverPasswordToken'
+    authorization: 'Bearer valid_recoverPasswordToken'
   }
 })
 
