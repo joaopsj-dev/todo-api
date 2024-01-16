@@ -1,8 +1,8 @@
 import { SequelizeAccountRepositoryAdapter } from '../../infra/adapters/repositories/account/sequelize-repository'
 import { JwtTokenAdapter } from '../../infra/adapters/token/jwt-token-adapter'
 import AccountModel from '../../infra/db/sequelize/models/Account'
-import { RefreshTokenController } from '../../presentation/controllers/refresh-token/refresh-token'
-import { RefreshToken } from '../../domain/usecases/refresh-token/refresh-token'
+import { RefreshTokenController } from '../../presentation/controllers/auth/refresh-token/refresh-token'
+import { RefreshToken } from '../../domain/usecases/auth/refresh-token/refresh-token'
 import { ZodValidatorAdapter } from '../../infra/adapters/validator/zod-validator-adapter'
 import { refreshTokenSchema } from '../zod/schemas/refresh-token-schema'
 
