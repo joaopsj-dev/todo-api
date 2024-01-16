@@ -107,9 +107,10 @@ describe('SendRecoverEmail usecase', () => {
     const { sut, tokenStub } = makeSut()
 
     const tokenSpy = jest.spyOn(tokenStub, 'generate')
+
     await sut.send('valid_email')
 
-    expect(tokenSpy).toHaveBeenCalledWith({ email: 'valid_email' }, expect.objectContaining({
+    expect(tokenSpy).toHaveBeenCalledWith({ id: 'any_id' }, expect.objectContaining({
       expiresIn: expect.any(String),
       secretKey: expect.any(String)
     }))

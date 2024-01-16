@@ -16,7 +16,7 @@ export class SendRecoverEmail {
     const accountByEmail = await this.accountRepository.findByEmail(email)
     if (!accountByEmail) return false
 
-    const recoverToken = await this.token.generate({ email }, {
+    const recoverToken = await this.token.generate({ id: accountByEmail.id }, {
       expiresIn: token_protocols.recover_token_expires_in,
       secretKey: token_protocols.recoverToken_secret_key
     })
