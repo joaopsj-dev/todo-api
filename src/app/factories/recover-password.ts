@@ -2,8 +2,8 @@ import { SequelizeAccountRepositoryAdapter } from '../../infra/adapters/reposito
 import { JwtTokenAdapter } from '../../infra/adapters/token/jwt-token-adapter'
 import AccountModel from '../../infra/db/sequelize/models/Account'
 import { ZodValidatorAdapter } from '../../infra/adapters/validator/zod-validator-adapter'
-import { RecoverPasswordController } from '../../presentation/controllers/recover-password/recover-password'
-import { SendRecoverEmail } from '../../domain/usecases/send-recover-email/send-recover-email'
+import { RecoverPasswordController } from '../../presentation/controllers/auth/recover-password/recover-password'
+import { SendRecoverEmail } from '../../domain/usecases/auth/send-recover-email/send-recover-email'
 import { NodeMailerEmailAdapter } from '../../infra/adapters/email/nodemailer-email-adapter'
 import { accountSchema } from '../zod/schemas/account-schema'
 

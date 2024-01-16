@@ -1,9 +1,9 @@
-import { AddAccount } from '../../domain/usecases/add-account/add-account'
+import { AddAccount } from '../../domain/usecases/auth/add-account/add-account'
 import { BcryptEncrypterAdapter } from '../../infra/adapters/encrypter/bcrypt-encrypter-adapter'
 import { SequelizeAccountRepositoryAdapter } from '../../infra/adapters/repositories/account/sequelize-repository'
 import { JwtTokenAdapter } from '../../infra/adapters/token/jwt-token-adapter'
 import { ZodValidatorAdapter } from '../../infra/adapters/validator/zod-validator-adapter'
-import { SignUpController } from '../../presentation/controllers/signup/signup'
+import { SignUpController } from '../../presentation/controllers/auth/signup/signup'
 import { accountSchema } from '../zod/schemas/account-schema'
 import AccountModel from '../../infra/db/sequelize/models/Account'
 

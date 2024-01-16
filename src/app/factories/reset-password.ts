@@ -1,9 +1,9 @@
-import { ResetPassword } from '../../domain/usecases/reset-password/reset-password'
+import { ResetPassword } from '../../domain/usecases/auth/reset-password/reset-password'
 import { BcryptEncrypterAdapter } from '../../infra/adapters/encrypter/bcrypt-encrypter-adapter'
 import { SequelizeAccountRepositoryAdapter } from '../../infra/adapters/repositories/account/sequelize-repository'
 import { JwtTokenAdapter } from '../../infra/adapters/token/jwt-token-adapter'
 import { ZodValidatorAdapter } from '../../infra/adapters/validator/zod-validator-adapter'
-import { ResetPasswordController } from '../../presentation/controllers/reset-password/reset-password'
+import { ResetPasswordController } from '../../presentation/controllers/auth/reset-password/reset-password'
 import { accountSchema } from '../zod/schemas/account-schema'
 import AccountModel from '../../infra/db/sequelize/models/Account'
 
