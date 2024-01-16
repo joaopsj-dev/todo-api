@@ -16,7 +16,8 @@ export class ResetPasswordController implements Controller {
         return badRequest(validateResponse.error)
       }
 
-      const parseResponse = await this.token.parse(httpRequest.headers.authorization, token_protocols.recoverToken_secret_key)
+      const recoverPasswordToken = httpRequest?.headers?.authorization.substring(7)
+      const parseResponse = await this.token.parse(recoverPasswordToken, token_protocols.recoverToken_secret_key)
       if (parseResponse.isFailure()) return unauthorized({ message: 'Invalid or expired token' })
 
       const resetPasswordResponse = await this.resetPassword.reset({
