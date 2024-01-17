@@ -6,7 +6,9 @@ const makeFakeAccount = (): Account => ({
   refreshToken: 'any_refresh_token',
   name: 'any_name',
   email: 'any_email',
-  password: 'any_password'
+  password: 'any_password',
+  createdAt: new Date(),
+  updatedAt: new Date()
 })
 
 const makeAccountRepository = (): AccountRepository => {
@@ -20,7 +22,7 @@ const makeAccountRepository = (): AccountRepository => {
     }
 
     findByEmail: (id: string) => Promise<Account>
-    create: (accountData: Account) => Promise<Account>
+    create: (accountData: Omit<Account, 'createdAt' | 'updatedAt'>) => Promise<Account>
   }
   return new AccountRepositoryStub()
 }
