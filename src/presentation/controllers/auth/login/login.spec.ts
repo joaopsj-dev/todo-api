@@ -17,7 +17,9 @@ const makeFakeAccount = (): Account => ({
   refreshToken: 'any_refreshToken',
   name: 'any_name',
   email: 'any_email',
-  password: 'any_password'
+  password: 'any_password',
+  createdAt: new Date(),
+  updatedAt: new Date()
 })
 
 const makeAuthenticate = (): Authenticate => {

@@ -7,8 +7,12 @@ export class SequelizeAccountRepositoryAdapter implements AccountRepository {
     private readonly AccountModel: ModelCtor<any>
   ) {}
 
-  async create (accountData: Account): Promise<Account> {
-    return await this.AccountModel.create({ ...accountData })
+  async create (accountData: Omit<Account, 'createdAt' | 'updatedAt'>): Promise<Account> {
+    return await this.AccountModel.create({
+      ...accountData,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
   }
 
   async findByEmail (email: string): Promise<Account> {
@@ -24,7 +28,10 @@ export class SequelizeAccountRepositoryAdapter implements AccountRepository {
   }
 
   async update (accountData: Partial<AddAccountData>, accountId: string): Promise<Account> {
-    await this.AccountModel.update({ ...accountData }, {
+    await this.AccountModel.update({
+      ...accountData,
+      updatedAt: new Date()
+    }, {
       where: { id: accountId }
     })
 

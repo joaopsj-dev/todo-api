@@ -6,7 +6,9 @@ const makeFakeAccount = (): Account => ({
   refreshToken: 'any_refresh_token',
   name: 'any_name',
   email: 'any_email',
-  password: 'any_password'
+  password: 'any_password',
+  createdAt: new Date(),
+  updatedAt: new Date()
 })
 
 const makeFakeAuthenticateData = (): { email: string, password: string } => ({
@@ -25,7 +27,7 @@ const makeAccountRepository = (): AccountRepository => {
     }
 
     findById: (id: string) => Promise<Account>
-    create: (accountData: Account) => Promise<Account>
+    create: (accountData: Omit<Account, 'createdAt' | 'updatedAt'>) => Promise<Account>
   }
   return new AccountRepositoryStub()
 }
@@ -178,6 +180,10 @@ describe('Authenticate UseCase', () => {
 
     const { response: account } = await sut.auth(makeFakeAuthenticateData()) as SuccessByAuthenticate
 
-    expect(account).toEqual(makeFakeAccount())
+    expect(account).toEqual(expect.objectContaining({
+      ...makeFakeAccount(),
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date)
+    }))
   })
 })

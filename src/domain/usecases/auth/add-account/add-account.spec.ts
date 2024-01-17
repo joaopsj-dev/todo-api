@@ -6,7 +6,9 @@ const makeFakeAccount = (): Account => ({
   refreshToken: 'any_refreshToken',
   name: 'any_name',
   email: 'any_email',
-  password: 'any_password'
+  password: 'any_password',
+  createdAt: new Date(),
+  updatedAt: new Date()
 })
 
 const makeFakeAddAccountData = (): AddAccountData => ({
@@ -129,6 +131,10 @@ describe('AddAccount UseCase', () => {
 
     const account = await sut.add(makeFakeAddAccountData())
 
-    expect(account).toEqual(makeFakeAccount())
+    expect(account).toEqual(expect.objectContaining({
+      ...makeFakeAccount(),
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date)
+    }))
   })
 })
