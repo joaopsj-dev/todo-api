@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto'
 
 export interface CreateTaskError {
   message: string
-  type: 'AccountNotFound' | 'InvalidDateRange' | 'RequiredData'
+  type: 'AccountNotFound' | 'InvalidDateRange'
 }
 
 export class CreateTask {
