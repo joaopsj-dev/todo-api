@@ -2,7 +2,7 @@ export interface Task {
   id: string
   accountId: string
   name: string
-  description: string
+  description?: string
   notifyDate?: Date
   endDate?: Date
   isNotify: boolean
