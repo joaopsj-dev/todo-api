@@ -25,11 +25,10 @@ const makeFakeTask = (): Task => ({
   accountId: 'any_accountId',
   name: 'any_name',
   description: 'any_description',
-  notifyDate,
-  endDate,
+  notifyDate: { year: notifyDate.getFullYear(), month: notifyDate.getMonth(), day: notifyDate.getDate(), hour: notifyDate.getHours(), minute: notifyDate.getMinutes() },
+  endDate: { year: endDate.getFullYear(), month: endDate.getMonth(), day: endDate.getDate(), hour: endDate.getHours(), minute: endDate.getMinutes() },
   isNotify: true,
   status: 'pending',
-  notification: 'any_description',
   createdAt,
   updatedAt
 })
