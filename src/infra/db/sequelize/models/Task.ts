@@ -22,8 +22,7 @@ const TaskModel = sequelize.define('tasks', {
     allowNull: true
   },
   isNotify: DataTypes.BOOLEAN,
-  status: DataTypes.STRING,
-  notification: DataTypes.JSON
+  status: DataTypes.STRING
 }, {
   tableName: 'tasks'
 });
