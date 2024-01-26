@@ -1,14 +1,17 @@
-import { type AddTaskData, type AccountRepository, type EmailProvider, type Scheduler, type Task, type TaskRepository } from './create-task-protocols'
+import { type AddTaskData, type AccountRepository, type Task, type TaskRepository } from './create-task-protocols'
 import { type Account } from '../../../entities/account'
 import { type Success, type Failure } from '../../../protocols/either'
 import { CreateTask, type CreateTaskError } from './create-task'
+
+const notifyDate = new Date(Date.now() + 1000 * 60)
+const endDate = new Date(Date.now() + 1000 * 60 * 60)
 
 const makeFakeAddTaskData = (): AddTaskData => ({
   accountId: 'any_accountId',
   name: 'any_name',
   description: 'any_description',
-  notifyDate: new Date(Date.now() + 5000),
-  endDate: new Date(Date.now() + 10000),
+  notifyDate: { year: notifyDate.getFullYear(), month: notifyDate.getMonth(), day: notifyDate.getDate(), hour: notifyDate.getHours(), minute: notifyDate.getMinutes() },
+  endDate: { year: endDate.getFullYear(), month: endDate.getMonth(), day: endDate.getDate(), hour: endDate.getHours(), minute: endDate.getMinutes() },
   isNotify: true
 })
 
@@ -38,11 +41,10 @@ const makeFakeTask = (): Task => ({
   accountId: 'any_accountId',
   name: 'any_name',
   description: 'any_description',
-  notifyDate: new Date(Date.now() + 5000),
-  endDate: new Date(Date.now() + 10000),
+  notifyDate: { year: notifyDate.getFullYear(), month: notifyDate.getMonth(), day: notifyDate.getDate(), hour: notifyDate.getHours(), minute: notifyDate.getMinutes() },
+  endDate: { year: endDate.getFullYear(), month: endDate.getMonth(), day: endDate.getDate(), hour: endDate.getHours(), minute: endDate.getMinutes() },
   isNotify: true,
   status: 'pending',
-  notification: 'any_description',
   createdAt: new Date(),
   updatedAt: new Date()
 })
@@ -56,48 +58,21 @@ const makeTaskRepository = (): TaskRepository => {
   return new TaskRepositoryStub()
 }
 
-const makeScheduler = (): Scheduler => {
-  class SchedulerStub implements Scheduler {
-    create (): any {
-      return {}
-    }
-
-    cancel: (schedule: any) => boolean
-  }
-  return new SchedulerStub()
-}
-
-const makeEmailProvider = (): EmailProvider => {
-  class EmailProviderStub implements EmailProvider {
-    async send (): Promise<void> {
-      return new Promise(resolve => resolve())
-    }
-  }
-
-  return new EmailProviderStub()
-}
-
 interface SutTypes {
   sut: CreateTask
   accountRepositoryStub: AccountRepository
   taskRepositoryStub: TaskRepository
-  schedulerStub: Scheduler
-  emailProviderStub: EmailProvider
 }
 
 const makeSut = (): SutTypes => {
   const accountRepositoryStub = makeAccountRepository()
   const taskRepositoryStub = makeTaskRepository()
-  const schedulerStub = makeScheduler()
-  const emailProviderStub = makeEmailProvider()
-  const sut = new CreateTask(accountRepositoryStub, taskRepositoryStub, schedulerStub, emailProviderStub)
+  const sut = new CreateTask(accountRepositoryStub, taskRepositoryStub)
 
   return {
     sut,
     accountRepositoryStub,
-    taskRepositoryStub,
-    schedulerStub,
-    emailProviderStub
+    taskRepositoryStub
   }
 }
 
@@ -138,9 +113,11 @@ describe('CreateTask usecase', () => {
   test('Should return a failure if the end date is less than the current date', async () => {
     const { sut } = makeSut()
 
+    const invalidDate = new Date(Date.now() - 1000 * 60 * 60)
+
     const { error } = await sut.create({
       ...makeFakeAddTaskData(),
-      endDate: new Date(Date.now() - 1000 * 60 * 60)
+      endDate: { year: invalidDate.getFullYear(), month: invalidDate.getMonth(), day: invalidDate.getDate(), hour: invalidDate.getHours(), minute: invalidDate.getMinutes() }
     }) as FailureByCreateTask
 
     expect(error).toStrictEqual(expect.objectContaining({
@@ -166,58 +143,16 @@ describe('CreateTask usecase', () => {
   test('Should return a failure if the notification date is after the end date', async () => {
     const { sut } = makeSut()
 
+    const invalidDate = new Date(endDate.getTime() + 1000 * 60 * 60)
+
     const { error } = await sut.create({
       ...makeFakeAddTaskData(),
-      notifyDate: new Date(Date.now() + 20000)
+      notifyDate: { year: invalidDate.getFullYear(), month: invalidDate.getMonth(), day: invalidDate.getDate(), hour: invalidDate.getHours(), minute: invalidDate.getMinutes() }
     }) as FailureByCreateTask
 
     expect(error).toStrictEqual(expect.objectContaining({
       message: expect.any(String),
       type: 'InvalidDateRange'
-    }))
-  })
-
-  test('Should throw Scheduler throws', async () => {
-    const { sut, schedulerStub } = makeSut()
-
-    jest.spyOn(schedulerStub, 'create').mockImplementationOnce(() => {
-      throw new Error('Mocked scheduler error');
-    });
-    const promise = sut.create(makeFakeAddTaskData())
-
-    await expect(promise).rejects.toThrow()
-  })
-
-  test('Should call scheduler create with correct values', async () => {
-    const { sut, schedulerStub } = makeSut()
-
-    const schedulerSpy = jest.spyOn(schedulerStub, 'create').mockImplementationOnce((date, callback) => {
-      callback()
-      return {}
-    })
-    const notifyDate = new Date(Date.now() + 5000)
-    await sut.create({
-      ...makeFakeAddTaskData(),
-      notifyDate
-    })
-
-    expect(schedulerSpy).toHaveBeenCalledWith(notifyDate, expect.any(Function))
-  })
-
-  test('Should call send mail with correct values', async () => {
-    const { sut, emailProviderStub, schedulerStub } = makeSut()
-
-    jest.spyOn(schedulerStub, 'create').mockImplementationOnce((date, callback) => {
-      callback()
-      return {}
-    })
-
-    const sendMailSpy = jest.spyOn(emailProviderStub, 'send')
-    await sut.create(makeFakeAddTaskData())
-
-    expect(sendMailSpy).toHaveBeenCalledWith(expect.objectContaining({
-      to: 'any_email',
-      subject: expect.any(String)
     }))
   })
 
@@ -239,10 +174,7 @@ describe('CreateTask usecase', () => {
     expect(createSpy).toHaveBeenCalledWith(expect.objectContaining({
       ...makeFakeAddTaskData(),
       id: expect.any(String),
-      notification: {},
       status: 'pending',
-      notifyDate: expect.any(Date),
-      endDate: expect.any(Date),
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date)
     }))
@@ -255,8 +187,6 @@ describe('CreateTask usecase', () => {
 
     expect(response).toStrictEqual(expect.objectContaining({
       ...makeFakeTask(),
-      notifyDate: expect.any(Date),
-      endDate: expect.any(Date),
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date)
     }))
