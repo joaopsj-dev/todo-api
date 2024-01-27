@@ -14,11 +14,11 @@ const TaskModel = sequelize.define('tasks', {
   name: DataTypes.STRING,
   description: DataTypes.STRING,
   notifyDate: {
-    type: DataTypes.DATE,
+    type: DataTypes.JSON,
     allowNull: true
   },
   endDate: {
-    type: DataTypes.DATE,
+    type: DataTypes.JSON,
     allowNull: true
   },
   isNotify: DataTypes.BOOLEAN,
