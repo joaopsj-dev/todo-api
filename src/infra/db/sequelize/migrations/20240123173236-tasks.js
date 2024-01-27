@@ -29,11 +29,11 @@ module.exports = {
       },
       notifyDate: {
         allowNull: true,
-        type: Sequelize.DATE,
+        type: Sequelize.JSON,
       },
       endDate: {
         allowNull: true,
-        type: Sequelize.DATE,
+        type: Sequelize.JSON,
       },
       isNotify: {
         allowNull: false,
