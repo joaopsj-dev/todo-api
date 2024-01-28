@@ -10,7 +10,7 @@ describe('NodeMailer Adapter', () => {
     const sut = makeSut()
 
     const sendMailSpy = jest.spyOn(transporter, 'sendMail')
-    await sut.send({ to: 'valid_email@mail.com', subject: 'any_subject' })
+    sut.send({ to: 'valid_email@mail.com', subject: 'any_subject' })
 
     expect(sendMailSpy).toHaveBeenCalledWith(expect.objectContaining({
       from: expect.any(String),

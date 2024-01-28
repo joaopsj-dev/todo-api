@@ -37,8 +37,7 @@ const makeTokenProvider = (): Token => {
 
 const makeEmailProvider = (): EmailProvider => {
   class EmailProviderStub implements EmailProvider {
-    async send (): Promise<void> {
-      return new Promise(resolve => resolve())
+    send (): void {
     }
   }
 
@@ -119,7 +118,7 @@ describe('SendRecoverEmail usecase', () => {
   test('Should throw EmailProvider throws', async () => {
     const { sut, emailProviderStub } = makeSut()
 
-    jest.spyOn(emailProviderStub, 'send').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+    jest.spyOn(emailProviderStub, 'send').mockImplementationOnce(() => { throw new Error() })
     const promise = sut.send('valid_email')
 
     await expect(promise).rejects.toThrow()

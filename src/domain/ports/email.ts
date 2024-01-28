@@ -5,5 +5,5 @@ export interface SendEmailData {
 }
 
 export interface EmailProvider {
-  send: (data: SendEmailData) => Promise<void>
+  send: (data: SendEmailData) => void
 }
