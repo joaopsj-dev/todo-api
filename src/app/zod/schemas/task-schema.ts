@@ -11,8 +11,8 @@ export const objectDate = z.object({
 export const taskSchema = z.object({
   name: z.string({ required_error: 'name is required' }).min(1),
   accountId: z.string({ required_error: 'accountId is required' }),
-  description: z.string({ required_error: 'description is required' }).min(1),
   isNotify: z.boolean({ required_error: 'isNotify is required' }),
+  description: z.string({ required_error: 'description is required' }).min(1).optional(),
   notifyDate: objectDate.optional(),
   endDate: objectDate.optional()
 })

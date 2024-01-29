@@ -22,7 +22,7 @@ export interface Task {
 export interface AddTaskData {
   accountId: string
   name: string
-  description: string
+  description?: string
   notifyDate?: ObjectDate
   endDate?: ObjectDate
   isNotify: boolean
