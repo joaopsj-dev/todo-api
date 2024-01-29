@@ -85,4 +85,16 @@ describe('Task Sequelize Repository', () => {
       expect(task.isNotify).toBe(true)
     })
   })
+
+  test('Should update and return an task on update method success', async () => {
+    const sut = makeSut()
+
+    await sut.create(await makeFakeCreateTaskData())
+    const updatedAccount = await sut.update(
+      { name: 'new_name' },
+      'any_id'
+    )
+
+    expect(updatedAccount.name).toBe('new_name')
+  })
 })

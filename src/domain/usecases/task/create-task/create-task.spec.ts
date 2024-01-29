@@ -10,8 +10,8 @@ const makeFakeAddTaskData = (): AddTaskData => ({
   accountId: 'any_accountId',
   name: 'any_name',
   description: 'any_description',
-  notifyDate: { year: notifyDate.getFullYear(), month: notifyDate.getMonth(), day: notifyDate.getDate(), hour: notifyDate.getHours(), minute: notifyDate.getMinutes() },
-  endDate: { year: endDate.getFullYear(), month: endDate.getMonth(), day: endDate.getDate(), hour: endDate.getHours(), minute: endDate.getMinutes() },
+  notifyDate: { year: notifyDate.getFullYear(), month: notifyDate.getMonth() + 1, day: notifyDate.getDate(), hour: notifyDate.getHours(), minute: notifyDate.getMinutes() },
+  endDate: { year: endDate.getFullYear(), month: endDate.getMonth() + 1, day: endDate.getDate(), hour: endDate.getHours(), minute: endDate.getMinutes() },
   isNotify: true
 })
 
@@ -54,6 +54,9 @@ const makeTaskRepository = (): TaskRepository => {
     async create (): Promise<Task> {
       return new Promise(resolve => resolve(makeFakeTask()))
     }
+
+    findByIsNotify: () => Promise<Task[]>
+    update: (taskData: Partial<Task>, taskId: string) => Promise<Task>
   }
   return new TaskRepositoryStub()
 }
@@ -83,7 +86,7 @@ describe('CreateTask usecase', () => {
   test('Should throw AccountRepository throws', async () => {
     const { sut, accountRepositoryStub } = makeSut()
 
-    jest.spyOn(accountRepositoryStub, 'findById').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+    jest.spyOn(accountRepositoryStub, 'findById').mockRejectedValueOnce(new Error())
     const promise = sut.create(makeFakeAddTaskData())
 
     await expect(promise).rejects.toThrow()
@@ -147,7 +150,7 @@ describe('CreateTask usecase', () => {
 
     const { error } = await sut.create({
       ...makeFakeAddTaskData(),
-      notifyDate: { year: invalidDate.getFullYear(), month: invalidDate.getMonth(), day: invalidDate.getDate(), hour: invalidDate.getHours(), minute: invalidDate.getMinutes() }
+      notifyDate: { year: invalidDate.getFullYear(), month: invalidDate.getMonth() + 1, day: invalidDate.getDate(), hour: invalidDate.getHours(), minute: invalidDate.getMinutes() }
     }) as FailureByCreateTask
 
     expect(error).toStrictEqual(expect.objectContaining({
