@@ -1,5 +1,6 @@
 import { type Task } from '../entities/task'
 
 export interface TaskRepository {
-  create: (accountData: Task) => Promise<Task>
+  create: (taskData: Task) => Promise<Task>
+  findByIsNotify: () => Promise<Task[]>
 }
