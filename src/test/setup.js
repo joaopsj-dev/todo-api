@@ -1,4 +1,5 @@
 const { default: AccountModel } = require("../infra/db/sequelize/models/Account");
+const { default: TaskModel } = require("../infra/db/sequelize/models/Task");
 const { sequelize } = require("../infra/db/sequelize/sequelize");
 
 beforeAll(async () => {
@@ -9,6 +10,7 @@ afterAll(async () => {
   await sequelize.close()
 })
 
-afterEach(async () => {
-  await AccountModel.destroy({ where: {}, truncate: true })
+beforeEach(async () => {
+  await TaskModel.destroy({ where: {}, truncate: { cascade: true } })
+  await AccountModel.destroy({ where: {}, truncate: { cascade: true } })
 })

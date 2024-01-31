@@ -21,7 +21,7 @@ export class SendRecoverEmail {
       secretKey: token_protocols.recoverToken_secret_key
     })
 
-    await this.emailProvider.send({
+    this.emailProvider.send({
       to: email,
       subject: 'Token de Recuperação de Senha',
       html: recoverPasswordHtml.replace('{TOKEN}', recoverToken)
