@@ -5,7 +5,5 @@ export interface HttpResponse {
 
 export interface HttpRequest {
   body?: any
-  headers?: {
-    authorization?: string
-  }
+  headers?: any
 }
