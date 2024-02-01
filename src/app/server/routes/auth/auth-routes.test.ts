@@ -95,7 +95,7 @@ describe('Auth Routes', () => {
 
     await request(app)
       .post('/api/auth/password/reset')
-      .set('Authorization', `Bearer ${recoverPasswordToken}`)
+      .set('x-recover-password-token', recoverPasswordToken)
       .send({
         password: 'any_password'
       })
