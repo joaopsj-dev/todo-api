@@ -1,5 +1,10 @@
 import { type HttpResponse } from '../protocols/http';
 
+export const forbidden = (error: any): HttpResponse => ({
+  statusCode: 403,
+  body: error
+})
+
 export const notFound = (error: any): HttpResponse => ({
   statusCode: 404,
   body: error
