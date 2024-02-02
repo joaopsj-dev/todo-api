@@ -4,6 +4,7 @@ import { ResetPassword } from './reset-password'
 const makeFakeAccount = (): Account => ({
   id: 'any_id',
   refreshToken: 'any_refresh_token',
+  accessToken: 'any_accessToken',
   name: 'any_name',
   email: 'any_email',
   password: 'any_password',

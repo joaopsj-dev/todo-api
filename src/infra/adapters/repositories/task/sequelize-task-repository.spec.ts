@@ -10,6 +10,7 @@ const endDate = new Date(Date.now() + 10000)
 const makeFakeCreateAccountData = (): Account => ({
   id: 'valid_id',
   refreshToken: 'valid_refreshToken',
+  accessToken: 'valid_accessToken',
   name: 'valid_name',
   email: 'valid_email',
   password: 'valid_password',

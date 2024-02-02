@@ -10,11 +10,10 @@ import AccountModel from '../../infra/db/sequelize/models/Account'
 export const makeSignUpController = (): SignUpController => {
   const accountRepository = new SequelizeAccountRepositoryAdapter(AccountModel)
   const encrypter = new BcryptEncrypterAdapter(12)
-  const addAccount = new AddAccount(accountRepository, encrypter)
+  const token = new JwtTokenAdapter()
+  const addAccount = new AddAccount(accountRepository, encrypter, token)
   //
   const validator = new ZodValidatorAdapter(accountSchema)
   //
-  const token = new JwtTokenAdapter()
-
-  return new SignUpController(addAccount, validator, token)
+  return new SignUpController(addAccount, validator)
 }

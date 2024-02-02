@@ -4,6 +4,7 @@ import { type Either, type Failure, type Success } from '../../../protocols/eith
 const makeFakeAccount = (): Account => ({
   id: 'any_id',
   refreshToken: 'any_refresh_token',
+  accessToken: 'any_accessToken',
   name: 'any_name',
   email: 'any_email',
   password: 'any_password',
@@ -148,6 +149,7 @@ describe('Authenticate UseCase', () => {
     const tokenSpy = jest.spyOn(tokenStub, 'generate')
     await sut.auth(makeFakeAuthenticateData())
 
+    expect(tokenSpy).toHaveBeenCalledTimes(2)
     expect(tokenSpy).toHaveBeenCalledWith({ id: 'any_id' }, expect.objectContaining({
       expiresIn: expect.any(String),
       secretKey: expect.any(String)
@@ -160,18 +162,20 @@ describe('Authenticate UseCase', () => {
     const updateSpy = jest.spyOn(accountRepositoryStub, 'update')
     await sut.auth(makeFakeAuthenticateData())
 
-    expect(updateSpy).toHaveBeenCalledWith({ refreshToken: 'token' }, 'any_id')
+    expect(updateSpy).toHaveBeenCalledWith({ accessToken: 'token', refreshToken: 'token' }, 'any_id')
   })
 
   test('Should update account refresh token', async () => {
     const { sut, accountRepositoryStub } = makeSut()
 
-    jest.spyOn(accountRepositoryStub, 'update').mockImplementationOnce(async ({ refreshToken }) => ({
+    jest.spyOn(accountRepositoryStub, 'update').mockImplementationOnce(async ({ accessToken, refreshToken }) => ({
       ...makeFakeAccount(),
+      accessToken,
       refreshToken
     }));
     const { response: account } = await sut.auth(makeFakeAuthenticateData()) as SuccessByAuthenticate
 
+    expect(account.accessToken).toBe('token')
     expect(account.refreshToken).toBe('token')
   })
 

@@ -6,6 +6,7 @@ import { failure, success } from '../../../protocols/either'
 const makeFakeAccount = (): Account => ({
   id: 'any_id',
   refreshToken: 'any_account_refreshToken',
+  accessToken: 'any_accessToken',
   name: 'any_name',
   email: 'any_email',
   password: 'any_password',

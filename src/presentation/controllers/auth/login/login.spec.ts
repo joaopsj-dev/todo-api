@@ -1,6 +1,6 @@
 import { type Account } from '../../../../domain/entities/account'
 import { type ValidateError } from '../../../../domain/ports/validate'
-import { type Token, type Validator, type HttpRequest, type Authenticate, type AuthenticateError, type ParseTokenError, type TokenPayload } from './login-protocols'
+import { type Validator, type HttpRequest, type Authenticate, type AuthenticateError } from './login-protocols'
 import { success, type Either, failure, type Failure } from '../../../../domain/protocols/either'
 import { LoginController } from './login'
 import { badRequest, notFound, ok, serverError, unauthorized } from '../../../helpers/http-helper'
@@ -15,6 +15,7 @@ const makeFakeRequest = (): HttpRequest => ({
 const makeFakeAccount = (): Account => ({
   id: 'any_id',
   refreshToken: 'any_refreshToken',
+  accessToken: 'any_accessToken',
   name: 'any_name',
   email: 'any_email',
   password: 'any_password',
@@ -40,35 +41,21 @@ const makeValidator = (): Validator => {
   return new ValidatorStub()
 }
 
-const makeTokenProvider = (): Token => {
-  class TokenProviderStub implements Token {
-    async generate (): Promise<string> {
-      return new Promise(resolve => resolve('token'))
-    }
-
-    parse: (token: string, secretKey: string) => Promise<Either<ParseTokenError, TokenPayload>>
-  }
-  return new TokenProviderStub()
-}
-
 interface SutTypes {
   sut: LoginController
   authenticateStub: Authenticate
   validatorStub: Validator
-  tokenProviderStub: Token
 }
 
 const makeSut = (): SutTypes => {
   const authenticateStub = makeAuthenticate()
   const validatorStub = makeValidator()
-  const tokenProviderStub = makeTokenProvider()
-  const sut = new LoginController(authenticateStub, validatorStub, tokenProviderStub)
+  const sut = new LoginController(authenticateStub, validatorStub)
 
   return {
     sut,
     authenticateStub,
-    validatorStub,
-    tokenProviderStub
+    validatorStub
   }
 }
 
@@ -148,36 +135,6 @@ describe('LoginController', () => {
     const httpResponse = await sut.handle(makeFakeRequest())
 
     expect(httpResponse).toEqual(unauthorized({ message: 'incorrect password' }))
-  })
-
-  test('Should return 500 if TokenProvider throws', async () => {
-    const { sut, tokenProviderStub } = makeSut()
-
-    const fakeError = new Error()
-    jest.spyOn(tokenProviderStub, 'generate').mockImplementationOnce(async () => {
-      return await new Promise((resolve, reject) => reject(fakeError))
-    })
-    const httpResponse = await sut.handle(makeFakeRequest())
-
-    expect(httpResponse).toEqual(serverError())
-  })
-
-  test('Should call Token generate with correct values', async () => {
-    const { sut, tokenProviderStub } = makeSut()
-
-    const accessTokenSpy = jest.spyOn(tokenProviderStub, 'generate')
-    const refreshTokenSpy = jest.spyOn(tokenProviderStub, 'generate')
-
-    await sut.handle(makeFakeRequest())
-
-    expect(accessTokenSpy).toHaveBeenCalledWith({ id: 'any_id' }, expect.objectContaining({
-      expiresIn: expect.any(String),
-      secretKey: expect.any(String)
-    }))
-    expect(refreshTokenSpy).toHaveBeenCalledWith({ id: 'any_id' }, expect.objectContaining({
-      expiresIn: expect.any(String),
-      secretKey: expect.any(String)
-    }))
   })
 
   test('Should return 200 if valid data is provided', async () => {

@@ -1,12 +1,10 @@
-import { type Validator, type Token, type Controller, type AddAccount, type HttpRequest, type HttpResponse } from './signup-protocols'
+import { type Validator, type Controller, type AddAccount, type HttpRequest, type HttpResponse } from './signup-protocols'
 import { badRequest, conflict, ok, serverError } from '../../../helpers/http-helper'
-import token_protocols from '../../../../domain/protocols/token'
 
 export class SignUpController implements Controller {
   constructor (
     private readonly addAccount: AddAccount,
-    private readonly validate: Validator,
-    private readonly token: Token
+    private readonly validate: Validator
   ) {}
 
   async handle (httpRequest: HttpRequest): Promise<HttpResponse> {
@@ -22,19 +20,7 @@ export class SignUpController implements Controller {
         return conflict({ message: 'email already exists' })
       }
 
-      const accessToken = await this.token.generate({
-        id: account.id
-      }, {
-        expiresIn: token_protocols.access_token_expires_in,
-        secretKey: token_protocols.accessToken_secret_key
-      })
-
-      const refreshToken = await this.token.generate({ id: account.id }, {
-        expiresIn: token_protocols.refresh_token_expires_in,
-        secretKey: token_protocols.refreshToken_secret_key
-      })
-
-      return ok({ accessToken, refreshToken })
+      return ok({ accessToken: account.accessToken, refreshToken: account.refreshToken })
     } catch (error) {
       return serverError()
     }

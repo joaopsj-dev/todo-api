@@ -1,6 +1,6 @@
 import { type Encrypter, type Account, type AccountRepository, type Token } from './authenticate-protocols'
 import { failure, type Either, success } from '../../../protocols/either'
-import token from '../../../protocols/token'
+import token_protocols from '../../../protocols/token'
 
 export interface AuthenticateError {
   message: 'user not found' | 'incorrect password'
@@ -25,12 +25,18 @@ export class Authenticate {
       return failure({ message: 'incorrect password' })
     }
 
+    const accessToken = await this.token.generate({ id: accountByEmail.id }, {
+      expiresIn: token_protocols.access_token_expires_in,
+      secretKey: token_protocols.accessToken_secret_key
+    })
+
     const refreshToken = await this.token.generate({ id: accountByEmail.id }, {
-      expiresIn: token.refresh_token_expires_in,
-      secretKey: token.refreshToken_secret_key
+      expiresIn: token_protocols.refresh_token_expires_in,
+      secretKey: token_protocols.refreshToken_secret_key
     })
 
     const account = await this.accountRepository.update({
+      accessToken,
       refreshToken
     }, accountByEmail.id)
 

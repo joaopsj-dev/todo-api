@@ -1,6 +1,6 @@
 import { type Account, type AddAccountData } from '../../../../domain/entities/account'
 import { type ValidateError } from '../../../../domain/ports/validate'
-import { type Token, type AddAccount, type Validator, type HttpRequest } from './signup-protocols'
+import { type AddAccount, type Validator, type HttpRequest } from './signup-protocols'
 import { success, type Either, failure } from '../../../../domain/protocols/either'
 import { SignUpController } from './signup'
 import { badRequest, conflict, ok, serverError } from '../../../helpers/http-helper'
@@ -16,6 +16,7 @@ const makeFakeRequest = (): HttpRequest => ({
 const makeFakeAccount = (): Account => ({
   id: 'any_id',
   refreshToken: 'any_refreshToken',
+  accessToken: 'any_accessToken',
   name: 'any_name',
   email: 'any_email',
   password: 'any_password',
@@ -41,37 +42,21 @@ const makeValidator = (): Validator => {
   return new ValidatorStub()
 }
 
-const makeTokenProvider = (): Token => {
-  class TokenProviderStub implements Token {
-    async generate (): Promise<string> {
-      return new Promise(resolve => resolve('token'))
-    }
-
-    async parse (): Promise<any> {
-      return new Promise(resolve => resolve(null))
-    }
-  }
-  return new TokenProviderStub()
-}
-
 interface SutTypes {
   sut: SignUpController
   addAccountStub: AddAccount
   validatorStub: Validator
-  tokenProviderStub: Token
 }
 
 const makeSut = (): SutTypes => {
   const addAccountStub = makeAddAccount()
   const validatorStub = makeValidator()
-  const tokenProviderStub = makeTokenProvider()
-  const sut = new SignUpController(addAccountStub, validatorStub, tokenProviderStub)
+  const sut = new SignUpController(addAccountStub, validatorStub)
 
   return {
     sut,
     addAccountStub,
-    validatorStub,
-    tokenProviderStub
+    validatorStub
   }
 }
 
@@ -139,38 +124,6 @@ describe('SignUpController', () => {
     const httpResponse = await sut.handle(makeFakeRequest())
 
     expect(httpResponse).toEqual(conflict({ message: 'email already exists' }))
-  })
-
-  test('Should return 500 if Token generate throws', async () => {
-    const { sut, tokenProviderStub } = makeSut()
-
-    const fakeError = new Error()
-    jest.spyOn(tokenProviderStub, 'generate').mockImplementationOnce(async () => {
-      return await new Promise((resolve, reject) => reject(fakeError))
-    })
-    const httpResponse = await sut.handle(makeFakeRequest())
-
-    expect(httpResponse).toEqual(serverError())
-  })
-
-  test('Should call Token generate with correct values', async () => {
-    const { sut, tokenProviderStub, addAccountStub } = makeSut()
-
-    jest.spyOn(addAccountStub, 'add').mockReturnValueOnce(new Promise(resolve => resolve(makeFakeAccount())))
-
-    const accessTokenSpy = jest.spyOn(tokenProviderStub, 'generate')
-    const refreshTokenSpy = jest.spyOn(tokenProviderStub, 'generate')
-
-    await sut.handle(makeFakeRequest())
-
-    expect(accessTokenSpy).toHaveBeenCalledWith({ id: 'any_id' }, expect.objectContaining({
-      expiresIn: expect.any(String),
-      secretKey: expect.any(String)
-    }))
-    expect(refreshTokenSpy).toHaveBeenCalledWith({ id: 'any_id' }, expect.objectContaining({
-      expiresIn: expect.any(String),
-      secretKey: expect.any(String)
-    }))
   })
 
   test('Should return 200 if valid data is provided', async () => {

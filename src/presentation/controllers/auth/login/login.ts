@@ -1,12 +1,10 @@
-import { type Authenticate, type Validator, type Token, type Controller, type HttpRequest, type HttpResponse } from './login-protocols'
+import { type Authenticate, type Validator, type Controller, type HttpRequest, type HttpResponse } from './login-protocols'
 import { badRequest, notFound, ok, serverError, unauthorized } from '../../../helpers/http-helper'
-import token_protocols from '../../../../domain/protocols/token'
 
 export class LoginController implements Controller {
   constructor (
     private readonly authenticate: Authenticate,
-    private readonly validate: Validator,
-    private readonly token: Token
+    private readonly validate: Validator
   ) {}
 
   async handle (httpRequest: HttpRequest): Promise<HttpResponse> {
@@ -27,12 +25,7 @@ export class LoginController implements Controller {
           : unauthorized({ message })
       }
 
-      const { id, refreshToken } = authenticateResponse.response
-
-      const accessToken = await this.token.generate({ id }, {
-        expiresIn: token_protocols.access_token_expires_in,
-        secretKey: token_protocols.accessToken_secret_key
-      })
+      const { accessToken, refreshToken } = authenticateResponse.response
 
       return ok({ accessToken, refreshToken })
     } catch (error) {

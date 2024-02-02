@@ -7,6 +7,7 @@ import { ResetPasswordController } from './reset-password'
 const makeFakeAccount = (): Account => ({
   id: 'any_id',
   refreshToken: 'any_refreshToken',
+  accessToken: 'any_accessToken',
   name: 'any_name',
   email: 'any_email',
   password: 'any_password',

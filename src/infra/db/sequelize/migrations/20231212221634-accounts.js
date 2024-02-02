@@ -11,6 +11,9 @@ module.exports = {
       refreshToken: {
         type: Sequelize.STRING
       },
+      accessToken: {
+        type: Sequelize.STRING
+      },
       name: {
         allowNull: false,
         type: Sequelize.STRING,

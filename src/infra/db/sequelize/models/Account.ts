@@ -7,6 +7,7 @@ const AccountModel = sequelize.define('accounts', {
     primaryKey: true
   },
   refreshToken: DataTypes.STRING,
+  accessToken: DataTypes.STRING,
   name: DataTypes.STRING,
   email: DataTypes.STRING,
   password: DataTypes.STRING,

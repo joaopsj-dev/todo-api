@@ -17,5 +17,5 @@ export const makeLoginController = (): LoginController => {
   const loginSchema = accountSchema.pick({ email: true, password: true })
   const validator = new ZodValidatorAdapter(loginSchema)
   //
-  return new LoginController(authenticate, validator, token)
+  return new LoginController(authenticate, validator)
 }

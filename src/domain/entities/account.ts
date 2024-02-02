@@ -1,6 +1,7 @@
 export interface Account {
   id: string
   refreshToken: string
+  accessToken: string
   name: string
   email: string
   password: string
@@ -9,7 +10,6 @@ export interface Account {
 }
 
 export interface AddAccountData {
-  refreshToken: string
   name: string
   email: string
   password: string
