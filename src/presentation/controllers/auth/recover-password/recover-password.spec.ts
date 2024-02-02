@@ -55,7 +55,7 @@ describe('RecoverPasswordController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should call validate method with request body', async () => {
@@ -97,7 +97,7 @@ describe('RecoverPasswordController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should return 404 if the e-mail is not found', async () => {

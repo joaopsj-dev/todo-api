@@ -44,7 +44,7 @@ describe('Auth Middleware', () => {
     jest.spyOn(tokenStub, 'parse').mockRejectedValueOnce(fakeError)
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should call parse method with request body', async () => {

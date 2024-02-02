@@ -25,7 +25,7 @@ export class RefreshTokenController implements Controller {
         accessToken: newAccessToken
       })
     } catch (error) {
-      return serverError(error as any)
+      return serverError()
     }
   }
 }

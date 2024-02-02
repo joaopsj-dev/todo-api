@@ -84,7 +84,7 @@ describe('LoginController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should call validate method with request body', async () => {
@@ -127,7 +127,7 @@ describe('LoginController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should return 404 if the user is not found', async () => {
@@ -159,7 +159,7 @@ describe('LoginController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should call Token generate with correct values', async () => {

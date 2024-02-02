@@ -83,7 +83,7 @@ describe('ResetPasswordController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should call validate method with request body', async () => {
@@ -116,7 +116,7 @@ describe('ResetPasswordController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should call parse method with correct values', async () => {
@@ -146,7 +146,7 @@ describe('ResetPasswordController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should call ResetPassword usecase with correct values', async () => {

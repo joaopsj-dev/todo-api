@@ -36,7 +36,7 @@ export class LoginController implements Controller {
 
       return ok({ accessToken, refreshToken })
     } catch (error) {
-      return serverError(error as any)
+      return serverError()
     }
   }
 }

@@ -21,7 +21,7 @@ export class RecoverPasswordController implements Controller {
 
       return ok({ message: 'Recovery e-mail sent successfully' })
     } catch (error) {
-      return serverError(error as any)
+      return serverError()
     }
   }
 }

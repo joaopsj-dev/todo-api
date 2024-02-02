@@ -85,7 +85,7 @@ describe('SignUpController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should call validate method with request body', async () => {
@@ -120,7 +120,7 @@ describe('SignUpController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should call AddAccount with request body', async () => {
@@ -150,7 +150,7 @@ describe('SignUpController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should call Token generate with correct values', async () => {

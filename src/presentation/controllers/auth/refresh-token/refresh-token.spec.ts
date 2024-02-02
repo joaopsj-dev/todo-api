@@ -55,7 +55,7 @@ describe('RefreshTokenController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should call validate method with request body', async () => {
@@ -88,7 +88,7 @@ describe('RefreshTokenController', () => {
     })
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(serverError(fakeError))
+    expect(httpResponse).toEqual(serverError())
   })
 
   test('Should call RefreshToken usecase with body refresh token', async () => {

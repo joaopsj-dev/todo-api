@@ -26,7 +26,7 @@ export class CreateTaskController implements Controller {
 
       return ok({ task: createTaskResponse.response })
     } catch (error) {
-      return serverError(error as any)
+      return serverError()
     }
   }
 }

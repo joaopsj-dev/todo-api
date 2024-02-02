@@ -28,7 +28,7 @@ export class ResetPasswordController implements Controller {
 
       return ok({ message: 'Successful updated password' })
     } catch (error) {
-      return serverError(error as any)
+      return serverError()
     }
   }
 }
