@@ -4,7 +4,7 @@ import { JwtTokenAdapter } from '../../../../infra/adapters/token/jwt-token-adap
 import token_protocols from '../../../../domain/protocols/token'
 
 describe('Auth Routes', () => {
-  test('Should return a 200 on signup success', async () => {
+  test('POST /signup', async () => {
     await request(app)
       .post('/api/auth/signup')
       .send({
@@ -15,7 +15,7 @@ describe('Auth Routes', () => {
       .expect(200)
   }, 30000)
 
-  test('Should return a 200 on login success', async () => {
+  test('POST /login', async () => {
     await request(app)
       .post('/api/auth/signup')
       .send({
@@ -33,7 +33,7 @@ describe('Auth Routes', () => {
       .expect(200)
   }, 30000)
 
-  test('Should return a 200 on refresh token success', async () => {
+  test('POST /token/refresh', async () => {
     await request(app)
       .post('/api/auth/signup')
       .send({
@@ -59,7 +59,7 @@ describe('Auth Routes', () => {
       .expect(200)
   }, 30000)
 
-  test('Should return an 200 on recover password success', async () => {
+  test('POST /password/recover', async () => {
     await request(app)
       .post('/api/auth/signup')
       .send({
@@ -76,7 +76,7 @@ describe('Auth Routes', () => {
       .expect(200)
   }, 30000)
 
-  test('Should return a 200 on success', async () => {
+  test('POST /password/reset', async () => {
     const { text } = await request(app)
       .post('/api/auth/signup')
       .send({

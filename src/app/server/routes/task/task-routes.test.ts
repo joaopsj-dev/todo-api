@@ -4,7 +4,7 @@ import { JwtTokenAdapter } from '../../../../infra/adapters/token/jwt-token-adap
 import token_protocols from '../../../../domain/protocols/token'
 
 describe('Task Routes', () => {
-  test('Should return a 403 on invalid access token', async () => {
+  test('AuthMiddleware in POST /task', async () => {
     const { text } = await request(app)
       .post('/api/auth/signup')
       .send({
@@ -26,7 +26,7 @@ describe('Task Routes', () => {
       .expect(403)
   }, 30000)
 
-  test('Should return a 200 on /task post success', async () => {
+  test('POST /task', async () => {
     const { text } = await request(app)
       .post('/api/auth/signup')
       .send({
