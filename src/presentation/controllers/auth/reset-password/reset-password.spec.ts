@@ -87,23 +87,24 @@ describe('ResetPasswordController', () => {
     expect(httpResponse).toEqual(serverError())
   })
 
-  test('Should call validate method with request body', async () => {
+  test('Should call validate method with correct values', async () => {
     const { sut, validatorStub } = makeSut()
 
     const validatorSpy = jest.spyOn(validatorStub, 'validate')
     await sut.handle(makeFakeRequest())
 
-    expect(validatorSpy).toHaveBeenCalledWith(makeFakeRequest().body)
+    expect(validatorSpy).toHaveBeenCalledWith({ ...makeFakeRequest().body, ...makeFakeRequest().headers })
   })
 
   test('Should return 400 if the parameters are not valid', async () => {
     const { sut, validatorStub } = makeSut()
 
     const validateError: ValidateError = [
-      { paramName: 'password', message: 'password is required' }
+      { paramName: 'password', message: 'password is required' },
+      { paramName: 'x-recover-password-token', message: 'x-recover-password-token is required' }
     ]
     jest.spyOn(validatorStub, 'validate').mockReturnValueOnce(new Promise(resolve => resolve(failure(validateError))))
-    const httpResponse = await sut.handle(makeFakeRequest())
+    const httpResponse = await sut.handle({})
 
     expect(httpResponse).toEqual(badRequest(validateError))
   })

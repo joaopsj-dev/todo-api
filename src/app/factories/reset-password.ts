@@ -4,7 +4,7 @@ import { SequelizeAccountRepositoryAdapter } from '../../infra/adapters/reposito
 import { JwtTokenAdapter } from '../../infra/adapters/token/jwt-token-adapter'
 import { ZodValidatorAdapter } from '../../infra/adapters/validator/zod-validator-adapter'
 import { ResetPasswordController } from '../../presentation/controllers/auth/reset-password/reset-password'
-import { accountSchema } from '../zod/schemas/account-schema'
+import { resetPasswordSchema } from '../zod/schemas/reset-password-schema'
 import AccountModel from '../../infra/db/sequelize/models/Account'
 
 export const makeResetPasswordController = (): ResetPasswordController => {
@@ -12,7 +12,6 @@ export const makeResetPasswordController = (): ResetPasswordController => {
   const encrypter = new BcryptEncrypterAdapter(12)
   const resetPassword = new ResetPassword(accountRepository, encrypter)
   //
-  const resetPasswordSchema = accountSchema.pick({ password: true })
   const validator = new ZodValidatorAdapter(resetPasswordSchema)
   const token = new JwtTokenAdapter()
   //

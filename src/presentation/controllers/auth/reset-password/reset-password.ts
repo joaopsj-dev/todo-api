@@ -11,12 +11,13 @@ export class ResetPasswordController implements Controller {
 
   async handle (httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
-      const validateResponse = await this.validator.validate(httpRequest.body)
+      const validateResponse = await this.validator.validate({ ...httpRequest.body, 'x-recover-password-token': httpRequest?.headers?.['x-recover-password-token'] })
       if (validateResponse.isFailure()) {
         return badRequest(validateResponse.error)
       }
 
       const recoverPasswordToken = httpRequest?.headers?.['x-recover-password-token']
+
       const parseResponse = await this.token.parse(recoverPasswordToken, token_protocols.recoverToken_secret_key)
       if (parseResponse.isFailure()) return unauthorized({ message: 'Invalid or expired token' })
 
