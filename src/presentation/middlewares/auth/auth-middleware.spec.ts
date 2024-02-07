@@ -1,6 +1,4 @@
-import { type Token } from './auth-middleware-protocols'
-import { type HttpRequest } from '../../protocols'
-import { failure, success } from '../../../domain/protocols/either'
+import { type ValidateAccess, type HttpRequest } from './auth-middleware-protocols'
 import { forbidden, ok, serverError } from '../../helpers/http-helper'
 import { AuthMiddleware } from './auth-middleware'
 
@@ -10,56 +8,55 @@ const makeFakeRequest = (): HttpRequest => ({
   }
 })
 
-const makeTokenProvider = (): Token => {
-  class TokenProviderStub implements Token {
-    async parse (): Promise<any> {
-      return new Promise(resolve => resolve(success({})))
+const makeValidateAccess = (): ValidateAccess => {
+  class ValidateAccessStub {
+    async validate (): Promise<boolean> {
+      return new Promise(resolve => resolve(true))
     }
-
-    generate: () => Promise<string>
   }
-  return new TokenProviderStub()
+  return new ValidateAccessStub() as unknown as ValidateAccess
 }
 
 interface SutTypes {
   sut: AuthMiddleware
-  tokenStub: Token
+  validateAccessStub: ValidateAccess
 }
 
 const makeSut = (): SutTypes => {
-  const tokenStub = makeTokenProvider()
-  const sut = new AuthMiddleware(tokenStub)
+  const validateAccessStub = makeValidateAccess()
+  const sut = new AuthMiddleware(validateAccessStub)
 
   return {
     sut,
-    tokenStub
+    validateAccessStub
   }
 }
 
 describe('Auth Middleware', () => {
-  test('Should return 500 if Token throws', async () => {
-    const { sut, tokenStub } = makeSut()
+  test('Should return 500 if Validator throws', async () => {
+    const { sut, validateAccessStub } = makeSut()
 
     const fakeError = new Error()
-    jest.spyOn(tokenStub, 'parse').mockRejectedValueOnce(fakeError)
+    jest.spyOn(validateAccessStub, 'validate').mockRejectedValueOnce(fakeError)
+
     const httpResponse = await sut.handle(makeFakeRequest())
 
     expect(httpResponse).toEqual(serverError())
   })
 
-  test('Should call parse method with request body', async () => {
-    const { sut, tokenStub } = makeSut()
+  test('Should call validate method with access token', async () => {
+    const { sut, validateAccessStub } = makeSut()
 
-    const parseSpy = jest.spyOn(tokenStub, 'parse')
+    const validateSpy = jest.spyOn(validateAccessStub, 'validate')
     await sut.handle(makeFakeRequest())
 
-    expect(parseSpy).toHaveBeenCalledWith('any_accessToken', expect.any(String))
+    expect(validateSpy).toHaveBeenCalledWith('any_accessToken')
   })
 
-  test('Should return 403 if invalid token', async () => {
-    const { sut, tokenStub } = makeSut()
+  test('Should return 403 if validateAccess return false', async () => {
+    const { sut, validateAccessStub } = makeSut()
 
-    jest.spyOn(tokenStub, 'parse').mockReturnValueOnce(new Promise(resolve => resolve(failure({ name: 'any_nameError', message: 'any_messageError' }))))
+    jest.spyOn(validateAccessStub, 'validate').mockReturnValueOnce(new Promise(resolve => resolve(false)))
     const httpResponse = await sut.handle(makeFakeRequest())
 
     expect(httpResponse).toEqual(forbidden({ message: expect.any(String) }))
