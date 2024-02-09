@@ -218,7 +218,9 @@ describe('UpdateAccount usecase', () => {
     expect(account).toEqual(expect.objectContaining({
       ...makeFakeAccount(),
       ...makeFakeAddAccountData(),
-      password: 'hashed_password'
+      password: 'hashed_password',
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date)
     }))
   })
 })
