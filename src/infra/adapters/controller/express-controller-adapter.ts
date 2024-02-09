@@ -5,7 +5,8 @@ export const expressControllerAdapter = (controller: Controller) => {
   return async (req: Request, res: Response) => {
     const httpRequest: HttpRequest = {
       body: req.body,
-      headers: req.headers
+      headers: req.headers,
+      params: req.params
     }
     const httpResponse = await controller.handle(httpRequest)
     res.status(httpResponse.statusCode).json(httpResponse.body)
