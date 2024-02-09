@@ -6,10 +6,11 @@ import { ZodValidatorAdapter } from '../../infra/adapters/validator/zod-validato
 import { SignUpController } from '../../presentation/controllers/auth/signup/signup'
 import { accountSchema } from '../zod/schemas/account-schema'
 import AccountModel from '../../infra/db/sequelize/models/Account'
+import encrypter_protocols from '../../domain/protocols/encrypter'
 
 export const makeSignUpController = (): SignUpController => {
   const accountRepository = new SequelizeAccountRepositoryAdapter(AccountModel)
-  const encrypter = new BcryptEncrypterAdapter(12)
+  const encrypter = new BcryptEncrypterAdapter(encrypter_protocols.salt)
   const token = new JwtTokenAdapter()
   const addAccount = new AddAccount(accountRepository, encrypter, token)
   //
