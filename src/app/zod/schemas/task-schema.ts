@@ -6,7 +6,7 @@ export const objectDate = z.object({
   day: z.number({ required_error: 'day is required' }).gte(1).lte(31),
   hour: z.number({ required_error: 'hour is required' }).gte(0).lte(60),
   minute: z.number({ required_error: 'minute is required' }).gte(0).lte(60)
-})
+}).strict()
 
 export const taskSchema = z.object({
   name: z.string({ required_error: 'name is required' }).min(1),
@@ -15,4 +15,4 @@ export const taskSchema = z.object({
   description: z.string({ required_error: 'description is required' }).min(1).optional(),
   notifyDate: objectDate.optional(),
   endDate: objectDate.optional()
-})
+}).strict()
