@@ -37,4 +37,10 @@ export class SequelizeAccountRepositoryAdapter implements AccountRepository {
 
     return this.findById(accountId)
   }
+
+  async delete (accountId: string): Promise<void> {
+    await this.AccountModel.destroy({
+      where: { id: accountId }
+    })
+  }
 }
