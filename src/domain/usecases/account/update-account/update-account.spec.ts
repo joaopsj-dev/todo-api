@@ -37,6 +37,7 @@ const makeAccountRepository = (): AccountRepository => {
     }
 
     create: () => Promise<Account>
+    delete: (accountId: string) => Promise<void>
   }
 
   return new AccountRepositoryStub()

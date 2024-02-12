@@ -23,6 +23,7 @@ const makeAccountRepository = (): AccountRepository => {
     findByEmail: () => Promise<Account>
     create: () => Promise<Account>
     update: () => Promise<Account>
+    delete: (accountId: string) => Promise<void>
   }
   return new AccountRepositoryStub()
 }

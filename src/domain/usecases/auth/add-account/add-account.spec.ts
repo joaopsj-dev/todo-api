@@ -30,6 +30,7 @@ const makeAccountRepository = (): AccountRepository => {
 
     findById: (id: string) => Promise<Account>
     update: (accountData: Partial<AddAccountData>, accountId: string) => Promise<Account>
+    delete: (accountId: string) => Promise<void>
   }
 
   return new AccountRepositoryStub()

@@ -29,6 +29,7 @@ const makeAccountRepository = (): AccountRepository => {
 
     findById: (id: string) => Promise<Account>
     create: (accountData: Omit<Account, 'createdAt' | 'updatedAt'>) => Promise<Account>
+    delete: (accountId: string) => Promise<void>
   }
   return new AccountRepositoryStub()
 }
