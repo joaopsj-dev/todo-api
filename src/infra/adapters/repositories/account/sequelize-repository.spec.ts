@@ -61,4 +61,14 @@ describe('Account Sequelize Repository', () => {
 
     expect(updatedAccount.name).toBe('new_name')
   })
+
+  test('Should remove the account on delete method success', async () => {
+    const sut = makeSut()
+
+    await sut.create(makeFakeCreateAccountData())
+    await sut.delete('valid_id')
+    const accountById = await sut.findById('valid_id')
+
+    expect(accountById).toBeNull()
+  })
 })
