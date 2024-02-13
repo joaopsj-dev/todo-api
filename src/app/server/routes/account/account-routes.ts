@@ -4,8 +4,10 @@ import { expressControllerAdapter } from '../../../../infra/adapters/controller/
 import { expressMiddlewareAdapter } from '../../../../infra/adapters/middleware/express-middleware-adapter'
 import { makeAuthMiddleware } from '../../../factories/middlewares/auth-middleware'
 import { makeUpdateAccountController } from '../../../factories/account/update-account'
+import { makeRemoveAccountController } from '../../../factories/account/remove-account'
 
 export default (router: Router): void => {
   const accessAuth = expressMiddlewareAdapter(makeAuthMiddleware())
   router.put('/account/:accountId', accessAuth, expressControllerAdapter(makeUpdateAccountController()))
+  router.delete('/account/:accountId', accessAuth, expressControllerAdapter(makeRemoveAccountController()))
 }
