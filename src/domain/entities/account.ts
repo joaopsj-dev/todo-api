@@ -14,3 +14,10 @@ export interface AddAccountData {
   email: string
   password: string
 }
+
+export interface AccountDto {
+  name: string
+  email: string
+  createdAt: Date
+  updatedAt: Date
+}
