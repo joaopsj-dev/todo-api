@@ -37,10 +37,11 @@ export class SequelizeTaskRepositoryAdapter implements TaskRepository {
   }
 
   async update (taskData: Partial<Task>, taskId: string): Promise<Task> {
-    await this.TaskModel.update({ ...taskData }, {
-      where: {
-        id: taskId
-      }
+    await this.TaskModel.update({
+      ...taskData,
+      updatedAt: new Date()
+    }, {
+      where: { id: taskId }
     })
 
     return this.TaskModel.findByPk(taskId)
