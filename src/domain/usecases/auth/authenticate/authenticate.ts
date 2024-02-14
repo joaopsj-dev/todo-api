@@ -3,7 +3,7 @@ import { failure, type Either, success } from '../../../protocols/either'
 import token_protocols from '../../../protocols/token'
 
 export interface AuthenticateError {
-  message: 'user not found' | 'incorrect password'
+  message: 'account not found' | 'incorrect password'
 }
 
 export class Authenticate {
@@ -16,7 +16,7 @@ export class Authenticate {
   async auth ({ email, password }: { email: string, password: string }): Promise<Either<AuthenticateError, Account>> {
     const accountByEmail = await this.accountRepository.findByEmail(email)
     if (!accountByEmail) {
-      return failure({ message: 'user not found' })
+      return failure({ message: 'account not found' })
     }
 
     const resultParsed = await this.encrypter.parse(password, accountByEmail.password)

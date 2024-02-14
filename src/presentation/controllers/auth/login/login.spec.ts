@@ -117,14 +117,14 @@ describe('LoginController', () => {
     expect(httpResponse).toEqual(serverError())
   })
 
-  test('Should return 404 if the user is not found', async () => {
+  test('Should return 404 if the account is not found', async () => {
     const { sut, authenticateStub } = makeSut()
 
-    const authenticateError = failure({ message: 'user not found' }) as FailureByAuthenticate
+    const authenticateError = failure({ message: 'account not found' }) as FailureByAuthenticate
     jest.spyOn(authenticateStub, 'auth').mockReturnValueOnce(new Promise(resolve => resolve(authenticateError)))
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(notFound({ message: 'user not found' }))
+    expect(httpResponse).toEqual(notFound({ message: 'account not found' }))
   })
 
   test('Should return 401 if password is incorrect', async () => {

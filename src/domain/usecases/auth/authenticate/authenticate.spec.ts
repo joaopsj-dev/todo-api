@@ -99,7 +99,7 @@ describe('Authenticate UseCase', () => {
     expect(findByEmailSpy).toHaveBeenCalledWith('valid_email')
   })
 
-  test('Should return a failure if there is no user with the email provided', async () => {
+  test('Should return a failure if there is no account with the email provided', async () => {
     const { sut, accountRepositoryStub } = makeSut()
 
     jest.spyOn(accountRepositoryStub, 'findByEmail').mockReturnValueOnce(new Promise(resolve => resolve(null)))
