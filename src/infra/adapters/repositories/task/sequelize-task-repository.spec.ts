@@ -100,4 +100,13 @@ describe('Task Sequelize Repository', () => {
 
     expect(updatedAccount.name).toBe('new_name')
   })
+
+  test('Should return a task on findById method success', async () => {
+    const sut = makeSut()
+
+    await sut.create(await makeFakeCreateTaskData())
+    const accountById = await sut.findById('any_id')
+
+    expect(accountById.id).toBe('any_id')
+  })
 })
