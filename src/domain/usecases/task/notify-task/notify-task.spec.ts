@@ -54,6 +54,7 @@ const makeTaskRepository = (): TaskRepository => {
       return new Promise(resolve => resolve([makeFakeTask()]))
     }
 
+    findById: (taskId: string) => Promise<Task>
     create: () => Promise<Task>
   }
   return new TaskRepositoryStub()

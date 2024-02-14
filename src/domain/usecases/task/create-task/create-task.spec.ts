@@ -59,6 +59,7 @@ const makeTaskRepository = (): TaskRepository => {
       return new Promise(resolve => resolve(makeFakeTask()))
     }
 
+    findById: (taskId: string) => Promise<Task>
     findByIsNotify: () => Promise<Task[]>
     update: (taskData: Partial<Task>, taskId: string) => Promise<Task>
   }

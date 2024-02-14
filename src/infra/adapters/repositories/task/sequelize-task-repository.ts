@@ -7,6 +7,12 @@ export class SequelizeTaskRepositoryAdapter implements TaskRepository {
     private readonly TaskModel: ModelCtor<any>
   ) {}
 
+  async findById (taskId: string): Promise<Task> {
+    return await this.TaskModel.findOne({
+      where: { id: taskId }
+    })
+  }
+
   async create (taskData: Task): Promise<Task> {
     return await this.TaskModel.create({ ...taskData })
   }

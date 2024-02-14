@@ -4,4 +4,5 @@ export interface TaskRepository {
   create: (taskData: Task) => Promise<Task>
   findByIsNotify: () => Promise<Task[]>
   update: (taskData: Partial<Task>, taskId: string) => Promise<Task>
+  findById: (taskId: string) => Promise<Task>
 }
