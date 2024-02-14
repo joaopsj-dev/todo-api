@@ -1,4 +1,4 @@
-import { AddAccount } from '../../domain/usecases/auth/add-account/add-account'
+import { AddAccount } from '../../domain/usecases/account/add-account/add-account'
 import { BcryptEncrypterAdapter } from '../../infra/adapters/encrypter/bcrypt-encrypter-adapter'
 import { SequelizeAccountRepositoryAdapter } from '../../infra/adapters/repositories/account/sequelize-repository'
 import { JwtTokenAdapter } from '../../infra/adapters/token/jwt-token-adapter'

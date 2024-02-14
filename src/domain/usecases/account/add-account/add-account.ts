@@ -1,6 +1,6 @@
 import { type AddAccountData, type Account, type AccountRepository, type Encrypter, type Token } from './add-account-protocols'
 import { randomUUID } from 'crypto'
-import token_protocols from '../../../../domain/protocols/token'
+import token_protocols from '../../../protocols/token'
 
 export class AddAccount {
   constructor (
