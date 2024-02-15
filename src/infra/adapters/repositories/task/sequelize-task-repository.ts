@@ -46,4 +46,10 @@ export class SequelizeTaskRepositoryAdapter implements TaskRepository {
 
     return this.TaskModel.findByPk(taskId)
   }
+
+  async delete (taskId: string): Promise<void> {
+    await this.TaskModel.destroy({
+      where: { id: taskId }
+    })
+  }
 }
