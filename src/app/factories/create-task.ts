@@ -4,7 +4,7 @@ import TaskModel from '../../infra/db/sequelize/models/Task'
 import { CreateTask } from '../../domain/usecases/task/create-task/create-task'
 import { taskSchema } from '../zod/schemas/task-schema'
 import { ZodValidatorAdapter } from '../../infra/adapters/validator/zod-validator-adapter'
-import { CreateTaskController } from '../../presentation/controllers/task/create-task'
+import { CreateTaskController } from '../../presentation/controllers/task/create-task/create-task'
 import { SequelizeTaskRepositoryAdapter } from '../../infra/adapters/repositories/task/sequelize-task-repository'
 
 export const makeCreateTaskController = (): CreateTaskController => {

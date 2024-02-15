@@ -1,8 +1,8 @@
 import { type HttpRequest, type CreateTask, type ValidateError, type Validator, type CreateTaskError } from './create-task-protocols'
-import { type AddTaskData, type Task } from '../../../domain/entities/task'
-import { type Either, success, failure } from '../../../domain/protocols/either'
+import { type AddTaskData, type Task } from '../../../../domain/entities/task'
+import { type Either, success, failure } from '../../../../domain/protocols/either'
 import { CreateTaskController } from './create-task'
-import { badRequest, notFound, ok, serverError } from '../../helpers/http-helper'
+import { badRequest, notFound, ok, serverError } from '../../../helpers/http-helper'
 
 const notifyDate = new Date(Date.now() + 5000)
 const endDate = new Date(Date.now() + 10000)
