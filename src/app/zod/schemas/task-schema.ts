@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { accountIdSchema } from './accountId-schema';
 
 export const objectDate = z.object({
   year: z.number({ required_error: 'year is required' }).gte(1000).lte(9999),
@@ -10,9 +11,8 @@ export const objectDate = z.object({
 
 export const taskSchema = z.object({
   name: z.string({ required_error: 'name is required' }).min(1),
-  accountId: z.string({ required_error: 'accountId is required' }),
   isNotify: z.boolean({ required_error: 'isNotify is required' }),
   description: z.string({ required_error: 'description is required' }).min(1).optional(),
   notifyDate: objectDate.optional(),
   endDate: objectDate.optional()
-}).strict()
+}).merge(accountIdSchema).strict()
