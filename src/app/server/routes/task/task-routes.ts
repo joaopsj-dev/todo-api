@@ -4,8 +4,10 @@ import { expressControllerAdapter } from '../../../../infra/adapters/controller/
 import { makeCreateTaskController } from '../../../factories/task/create-task'
 import { expressMiddlewareAdapter } from '../../../../infra/adapters/middleware/express-middleware-adapter'
 import { makeAuthMiddleware } from '../../../factories/middlewares/auth-middleware'
+import { makeUpdateTaskController } from '../../../factories/task/update-task'
 
 export default (router: Router): void => {
   const accessAuth = expressMiddlewareAdapter(makeAuthMiddleware())
   router.post('/task', accessAuth, expressControllerAdapter(makeCreateTaskController()))
+  router.put('/task/:taskId', accessAuth, expressControllerAdapter(makeUpdateTaskController()))
 }
