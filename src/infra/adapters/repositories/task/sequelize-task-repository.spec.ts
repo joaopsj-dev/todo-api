@@ -109,4 +109,14 @@ describe('Task Sequelize Repository', () => {
 
     expect(accountById.id).toBe('any_id')
   })
+
+  test('Should remove the task on delete method success', async () => {
+    const sut = makeSut()
+
+    await sut.create(await makeFakeCreateTaskData())
+    await sut.delete('any_id')
+    const accountById = await sut.findById('any_id')
+
+    expect(accountById).toBeNull()
+  })
 })
