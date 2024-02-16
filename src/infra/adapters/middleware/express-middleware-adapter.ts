@@ -10,6 +10,7 @@ export const expressMiddlewareAdapter = (middleware: Middleware) => {
     if (httpResponse.statusCode !== 200) {
       return res.status(httpResponse.statusCode).json({ error: httpResponse.body.message })
     }
+    Object.assign(req, httpResponse.body)
     next()
   }
 }

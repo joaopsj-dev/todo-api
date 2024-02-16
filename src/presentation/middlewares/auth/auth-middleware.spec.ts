@@ -1,6 +1,18 @@
 import { type ValidateAccess, type HttpRequest } from './auth-middleware-protocols'
+import { type Account } from '../../../domain/entities/account'
 import { forbidden, ok, serverError } from '../../helpers/http-helper'
 import { AuthMiddleware } from './auth-middleware'
+
+const makeFakeAccount = (): Account => ({
+  id: 'any_id',
+  refreshToken: 'any_account_refreshToken',
+  accessToken: 'any_accessToken',
+  name: 'any_name',
+  email: 'any_email',
+  password: 'any_password',
+  createdAt: new Date(),
+  updatedAt: new Date()
+})
 
 const makeFakeRequest = (): HttpRequest => ({
   headers: {
@@ -10,8 +22,8 @@ const makeFakeRequest = (): HttpRequest => ({
 
 const makeValidateAccess = (): ValidateAccess => {
   class ValidateAccessStub {
-    async validate (): Promise<boolean> {
-      return new Promise(resolve => resolve(true))
+    async validate (): Promise<Account> {
+      return new Promise(resolve => resolve(makeFakeAccount()))
     }
   }
   return new ValidateAccessStub() as unknown as ValidateAccess
@@ -53,10 +65,10 @@ describe('Auth Middleware', () => {
     expect(validateSpy).toHaveBeenCalledWith('any_accessToken')
   })
 
-  test('Should return 403 if validateAccess return false', async () => {
+  test('Should return 403 if validateAccess return null', async () => {
     const { sut, validateAccessStub } = makeSut()
 
-    jest.spyOn(validateAccessStub, 'validate').mockReturnValueOnce(new Promise(resolve => resolve(false)))
+    jest.spyOn(validateAccessStub, 'validate').mockResolvedValueOnce(null)
     const httpResponse = await sut.handle(makeFakeRequest())
 
     expect(httpResponse).toEqual(forbidden({ message: expect.any(String) }))
@@ -67,6 +79,6 @@ describe('Auth Middleware', () => {
 
     const httpResponse = await sut.handle(makeFakeRequest())
 
-    expect(httpResponse).toEqual(ok({}))
+    expect(httpResponse).toEqual(ok({ accountId: 'any_id' }))
   })
 })

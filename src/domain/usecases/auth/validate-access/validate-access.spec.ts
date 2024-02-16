@@ -78,13 +78,13 @@ describe('ValidateAccess usecase', () => {
     expect(tokenParseSpy).toHaveBeenCalledWith('any_accessToken', expect.any(String));
   })
 
-  test('Should return a false if invalid access token', async () => {
+  test('Should return a null if invalid access token', async () => {
     const { sut, tokenStub } = makeSut()
 
-    jest.spyOn(tokenStub, 'parse').mockReturnValueOnce(new Promise(resolve => resolve(failure(null))))
+    jest.spyOn(tokenStub, 'parse').mockResolvedValueOnce(failure(null))
     const response = await sut.validate('invalid_accessToken')
 
-    expect(response).toBeFalsy()
+    expect(response).toBeNull()
   })
 
   test('Should throw AccountRepository throws', async () => {
@@ -105,28 +105,28 @@ describe('ValidateAccess usecase', () => {
     expect(findByIdSpy).toHaveBeenCalledWith('any_id')
   })
 
-  test('Should return false if account with received token is not found', async () => {
+  test('Should return null if account with received token is not found', async () => {
     const { sut, accountRepositoryStub } = makeSut()
 
-    jest.spyOn(accountRepositoryStub, 'findById').mockReturnValueOnce(new Promise(resolve => resolve(null)))
+    jest.spyOn(accountRepositoryStub, 'findById').mockResolvedValueOnce(null)
     const response = await sut.validate('any_accessToken')
 
-    expect(response).toBeFalsy()
+    expect(response).toBeNull()
   })
 
-  test('Should return false if account token is different from received token', async () => {
+  test('Should return null if account token is different from received token', async () => {
     const { sut } = makeSut()
 
     const response = await sut.validate('invalid_accessToken')
 
-    expect(response).toBeFalsy()
+    expect(response).toBeNull()
   })
 
-  test('Should return true if account token is equal to received token', async () => {
+  test('Should return a account if account token is equal to received token', async () => {
     const { sut } = makeSut()
 
     const response = await sut.validate('any_accessToken')
 
-    expect(response).toBeTruthy()
+    expect(response).toEqual(makeFakeAccount())
   })
 })

@@ -10,9 +10,9 @@ export class AuthMiddleware implements Middleware {
     try {
       const accessToken = httpRequest.headers?.['x-access-token']
 
-      const isAccessValidated = await this.validateAccess.validate(accessToken)
+      const account = await this.validateAccess.validate(accessToken)
 
-      return isAccessValidated ? ok({}) : forbidden({ message: 'Access denied' })
+      return account ? ok({ accountId: account.id }) : forbidden({ message: 'Access denied' })
     } catch (error) {
       return serverError()
     }
