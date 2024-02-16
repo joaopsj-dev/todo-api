@@ -127,8 +127,8 @@ describe('GetAccountController', () => {
     const { sut } = makeSut()
 
     const httpResponse = await sut.handle(makeFakeRequest())
-    const { name, email, createdAt, updatedAt } = makeFakeAccount()
+    const { name, email } = makeFakeAccount()
 
-    expect(httpResponse).toEqual(ok({ name, email, createdAt, updatedAt }))
+    expect(httpResponse).toEqual(ok({ name, email, createdAt: expect.any(Date), updatedAt: expect.any(Date) }))
   })
 })

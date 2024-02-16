@@ -76,6 +76,11 @@ describe('GetAccount usecase', () => {
 
     const response = await sut.get('any_id')
 
-    expect(response).toBeTruthy()
+    expect(response).toEqual(expect.objectContaining({
+      name: 'any_name',
+      email: 'any_email',
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date)
+    }))
   })
 })
