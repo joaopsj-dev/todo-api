@@ -78,4 +78,44 @@ describe('Task Routes', () => {
         isNotify: false
       }).expect(200)
   }, 30000)
+
+  test('AuthMiddleware in DELETE /task', async () => {
+    await request(app)
+      .delete('/api/task/any_taskId')
+      .expect(403)
+  }, 30000)
+
+  test('DELETE /task', async () => {
+    const { text } = await request(app)
+      .post('/api/auth/signup')
+      .send({
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        password: 'any_password'
+      })
+
+    const { accessToken } = JSON.parse(text)
+    const { response: { payload } } = await new JwtTokenAdapter().parse(accessToken, token_protocols.accessToken_secret_key) as any
+
+    const notifyDate = new Date(Date.now() + 1000 * 60)
+    const endDate = new Date(Date.now() + 1000 * 60 * 60)
+
+    const task = await TaskModel.create({
+      id: 'any_id',
+      accountId: payload.id,
+      name: 'any_name',
+      description: 'any_description',
+      notifyDate: { year: notifyDate.getFullYear(), month: notifyDate.getMonth() + 1, day: notifyDate.getDate(), hour: notifyDate.getHours(), minute: notifyDate.getMinutes() },
+      endDate: { year: endDate.getFullYear(), month: endDate.getMonth() + 1, day: endDate.getDate(), hour: endDate.getHours(), minute: endDate.getMinutes() },
+      isNotify: true,
+      status: 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }) as any
+
+    await request(app)
+      .delete(`/api/task/${task.id}`)
+      .set('x-access-token', accessToken)
+      .expect(200)
+  }, 30000)
 })
