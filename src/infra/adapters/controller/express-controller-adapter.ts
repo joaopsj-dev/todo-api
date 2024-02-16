@@ -7,7 +7,7 @@ export const expressControllerAdapter = (controller: Controller) => {
       body: req.body,
       headers: req.headers,
       params: req.params,
-      accountId: req?.accountId
+      accountId: (req as any)?.accountId
     }
     const httpResponse = await controller.handle(httpRequest)
     res.status(httpResponse.statusCode).json(httpResponse.body)
