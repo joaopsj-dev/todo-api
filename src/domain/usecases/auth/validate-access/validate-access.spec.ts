@@ -127,6 +127,10 @@ describe('ValidateAccess usecase', () => {
 
     const response = await sut.validate('any_accessToken')
 
-    expect(response).toEqual(makeFakeAccount())
+    expect(response).toEqual({
+      ...makeFakeAccount(),
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date)
+    })
   })
 })
