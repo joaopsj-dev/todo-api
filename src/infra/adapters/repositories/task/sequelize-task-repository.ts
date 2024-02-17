@@ -52,4 +52,10 @@ export class SequelizeTaskRepositoryAdapter implements TaskRepository {
       where: { id: taskId }
     })
   }
+
+  async findAllByAccount (accountId: string): Promise<Task[]> {
+    return await this.TaskModel.findAll({
+      where: { accountId }
+    })
+  }
 }

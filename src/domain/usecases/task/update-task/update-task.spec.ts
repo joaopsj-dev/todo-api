@@ -43,6 +43,7 @@ const makeTaskRepository = (): TaskRepository => {
     create: (taskData: Task) => Promise<Task>
     findByIsNotify: () => Promise<Task[]>
     delete: (taskId: string) => Promise<void>
+    findAllByAccount: (accountId: string) => Promise<Task[]>
   }
   return new TaskRepositoryStub()
 }
