@@ -18,36 +18,33 @@ const makeFakeCreateAccountData = (): Account => ({
   updatedAt: new Date()
 })
 
-const makeFakeCreateTaskData = async (): Promise<Task> => {
-  try {
-    const { id: accountId } = await AccountModel.create({ ...makeFakeCreateAccountData() }) as any
-    return {
-      id: 'any_id',
-      accountId,
-      name: 'any_name',
-      description: 'any_description',
-      notifyDate: { year: notifyDate.getFullYear(), month: notifyDate.getMonth() + 1, day: notifyDate.getDate(), hour: notifyDate.getHours(), minute: notifyDate.getMinutes() },
-      endDate: { year: endDate.getFullYear(), month: endDate.getMonth() + 1, day: endDate.getDate(), hour: endDate.getHours(), minute: endDate.getMinutes() },
-      isNotify: true,
-      status: 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
+const makeFakeCreateTaskData = (): Task => ({
+  id: 'any_id',
+  accountId: 'valid_id',
+  name: 'any_name',
+  description: 'any_description',
+  notifyDate: { year: notifyDate.getFullYear(), month: notifyDate.getMonth() + 1, day: notifyDate.getDate(), hour: notifyDate.getHours(), minute: notifyDate.getMinutes() },
+  endDate: { year: endDate.getFullYear(), month: endDate.getMonth() + 1, day: endDate.getDate(), hour: endDate.getHours(), minute: endDate.getMinutes() },
+  isNotify: true,
+  status: 'pending',
+  createdAt: new Date(),
+  updatedAt: new Date()
+})
 
 const makeSut = (): SequelizeTaskRepositoryAdapter => {
   return new SequelizeTaskRepositoryAdapter(TaskModel)
 }
 
 describe('Task Sequelize Repository', () => {
+  beforeEach(async () => {
+    await AccountModel.create({ ...makeFakeCreateAccountData() })
+  })
+
   test('Should throws if sequelize throws', async () => {
     const sut = makeSut()
 
     jest.spyOn(TaskModel, 'create').mockRejectedValueOnce(new Error())
-    const promise = sut.create(await makeFakeCreateTaskData())
+    const promise = sut.create(makeFakeCreateTaskData())
 
     await expect(promise).rejects.toThrow()
   })
@@ -55,7 +52,7 @@ describe('Task Sequelize Repository', () => {
   test('Should return an task on create method success', async () => {
     const sut = makeSut()
 
-    const createTaskData = await makeFakeCreateTaskData()
+    const createTaskData = makeFakeCreateTaskData()
     const task = await sut.create(createTaskData)
 
     expect(task).toEqual(expect.objectContaining({
@@ -68,7 +65,7 @@ describe('Task Sequelize Repository', () => {
   test('Should return all tasks that need to be notified', async () => {
     const sut = makeSut()
 
-    const createTaskData = await makeFakeCreateTaskData()
+    const createTaskData = makeFakeCreateTaskData()
     await sut.create(createTaskData)
     await sut.create({
       ...createTaskData,
@@ -92,31 +89,42 @@ describe('Task Sequelize Repository', () => {
   test('Should update and return an task on update method success', async () => {
     const sut = makeSut()
 
-    await sut.create(await makeFakeCreateTaskData())
-    const updatedAccount = await sut.update(
+    await sut.create(makeFakeCreateTaskData())
+    const updatedTask = await sut.update(
       { name: 'new_name' },
       'any_id'
     )
 
-    expect(updatedAccount.name).toBe('new_name')
+    expect(updatedTask.name).toBe('new_name')
   })
 
   test('Should return a task on findById method success', async () => {
     const sut = makeSut()
 
-    await sut.create(await makeFakeCreateTaskData())
-    const accountById = await sut.findById('any_id')
+    await sut.create(makeFakeCreateTaskData())
+    const taskById = await sut.findById('any_id')
 
-    expect(accountById.id).toBe('any_id')
+    expect(taskById.id).toBe('any_id')
   })
 
   test('Should remove the task on delete method success', async () => {
     const sut = makeSut()
 
-    await sut.create(await makeFakeCreateTaskData())
+    await sut.create(makeFakeCreateTaskData())
     await sut.delete('any_id')
-    const accountById = await sut.findById('any_id')
+    const taskById = await sut.findById('any_id')
 
-    expect(accountById).toBeNull()
+    expect(taskById).toBeNull()
+  })
+
+  test('Should return all tasks by account', async () => {
+    const sut = makeSut()
+
+    await sut.create(makeFakeCreateTaskData())
+    await sut.create({ ...makeFakeCreateTaskData(), id: 'other_id' })
+    const tasksByAccount = await sut.findAllByAccount('valid_id')
+
+    expect(tasksByAccount.length).toBe(2)
+    tasksByAccount.forEach(task => expect(task.accountId).toBe('valid_id'))
   })
 })
