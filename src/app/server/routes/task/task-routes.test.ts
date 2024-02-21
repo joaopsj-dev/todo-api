@@ -118,4 +118,41 @@ describe('Task Routes', () => {
       .set('x-access-token', accessToken)
       .expect(200)
   }, 30000)
+
+  test('AuthMiddleware in GET /task', async () => {
+    await request(app)
+      .get('/api/task')
+      .expect(403)
+  }, 30000)
+
+  test('GET /task', async () => {
+    const { text } = await request(app)
+      .post('/api/auth/signup')
+      .send({
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        password: 'any_password'
+      })
+
+    const { accessToken } = JSON.parse(text)
+    const { response: { payload } } = await new JwtTokenAdapter().parse(accessToken, token_protocols.accessToken_secret_key) as any
+
+    await TaskModel.create({
+      id: 'task_1',
+      accountId: payload.id,
+      name: 'any_name',
+      description: null,
+      notifyDate: null,
+      endDate: null,
+      isNotify: false,
+      status: 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }) as any
+
+    await request(app)
+      .get('/api/task')
+      .set('x-access-token', accessToken)
+      .expect(200)
+  }, 30000)
 })
