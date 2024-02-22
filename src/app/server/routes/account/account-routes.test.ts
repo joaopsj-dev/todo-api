@@ -84,7 +84,7 @@ describe('Account Routes', () => {
       })
 
     await request(app)
-      .get('/api/account/any_accountId')
+      .get('/api/account')
       .expect(403)
   }, 30000)
 
@@ -98,10 +98,9 @@ describe('Account Routes', () => {
       })
 
     const { accessToken } = JSON.parse(text)
-    const { response: { payload } } = await new JwtTokenAdapter().parse(accessToken, token_protocols.accessToken_secret_key) as any
 
     await request(app)
-      .get(`/api/account/${payload.id}`)
+      .get('/api/account')
       .set('x-access-token', accessToken)
       .expect(200)
   }, 30000)

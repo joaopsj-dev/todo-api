@@ -5,9 +5,7 @@ import { badRequest, notFound, ok, serverError } from '../../../helpers/http-hel
 import { GetAccountController } from './get-account'
 
 const makeFakeRequest = (): HttpRequest => ({
-  params: {
-    accountId: 'any_id'
-  }
+  accountId: 'any_id'
 })
 
 const makeFakeAccount = (): Account => ({
@@ -79,7 +77,7 @@ describe('GetAccountController', () => {
     const validatorSpy = jest.spyOn(validatorStub, 'validate')
     await sut.handle(makeFakeRequest())
 
-    expect(validatorSpy).toHaveBeenCalledWith(makeFakeRequest().params)
+    expect(validatorSpy).toHaveBeenCalledWith(makeFakeRequest())
   })
 
   test('Should return 400 if the parameters are not valid', async () => {

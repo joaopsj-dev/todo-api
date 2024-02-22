@@ -9,12 +9,12 @@ export class GetAccountController implements Controller {
 
   async handle (httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
-      const validateResponse = await this.validator.validate({ accountId: httpRequest.params.accountId })
+      const validateResponse = await this.validator.validate({ accountId: httpRequest.accountId })
       if (validateResponse.isFailure()) {
         return badRequest(validateResponse.error)
       }
 
-      const account = await this.getAccount.get(httpRequest.params.accountId)
+      const account = await this.getAccount.get(httpRequest.accountId)
 
       return account ? ok(account) : notFound({ message: 'Account not found' })
     } catch (error) {
