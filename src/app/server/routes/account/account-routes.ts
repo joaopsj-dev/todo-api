@@ -11,5 +11,5 @@ export default (router: Router): void => {
   const accessAuth = expressMiddlewareAdapter(makeAuthMiddleware())
   router.get('/account', accessAuth, expressControllerAdapter(makeGetAccountController()))
   router.put('/account/:accountId', accessAuth, expressControllerAdapter(makeUpdateAccountController()))
-  router.delete('/account/:accountId', accessAuth, expressControllerAdapter(makeRemoveAccountController()))
+  router.delete('/account', accessAuth, expressControllerAdapter(makeRemoveAccountController()))
 }

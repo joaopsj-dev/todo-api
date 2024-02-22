@@ -9,12 +9,12 @@ export class RemoveAccountController implements Controller {
 
   async handle (httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
-      const validateResponse = await this.validator.validate({ accountId: httpRequest.params.accountId })
+      const validateResponse = await this.validator.validate({ accountId: httpRequest.accountId })
       if (validateResponse.isFailure()) {
         return badRequest(validateResponse.error)
       }
 
-      if (!(await this.removeAccount.remove(httpRequest.params.accountId))) return notFound({ message: 'Account not found' })
+      if (!(await this.removeAccount.remove(httpRequest.accountId))) return notFound({ message: 'Account not found' })
 
       return ok({ message: 'Account successfully removed' })
     } catch (error) {
