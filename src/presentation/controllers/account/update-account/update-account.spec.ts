@@ -9,9 +9,7 @@ const makeFakeRequest = (): HttpRequest => ({
     email: 'new_email@mail.com',
     password: 'new_password'
   },
-  params: {
-    accountId: 'any_id'
-  }
+  accountId: 'any_id'
 })
 
 const makeFakeAccount = (): Account => ({
@@ -82,7 +80,7 @@ describe('UpdateAccountController', () => {
     const validatorSpy = jest.spyOn(validatorStub, 'validate')
     await sut.handle(makeFakeRequest())
 
-    expect(validatorSpy).toHaveBeenCalledWith({ ...makeFakeRequest().body, accountId: makeFakeRequest().params.accountId })
+    expect(validatorSpy).toHaveBeenCalledWith({ ...makeFakeRequest().body, accountId: 'any_id' })
   })
 
   test('Should return 400 if the parameters are not valid', async () => {

@@ -9,12 +9,12 @@ export class UpdateAccountController implements Controller {
 
   async handle (httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
-      const validateResponse = await this.validator.validate({ ...httpRequest.body, accountId: httpRequest.params.accountId })
+      const validateResponse = await this.validator.validate({ ...httpRequest.body, accountId: httpRequest.accountId })
       if (validateResponse.isFailure()) {
         return badRequest(validateResponse.error)
       }
 
-      const updateAccountResponse = await this.updateAccount.update(httpRequest.body, httpRequest.params.accountId)
+      const updateAccountResponse = await this.updateAccount.update(httpRequest.body, httpRequest.accountId)
 
       if (updateAccountResponse.isFailure()) {
         const { message } = updateAccountResponse.error

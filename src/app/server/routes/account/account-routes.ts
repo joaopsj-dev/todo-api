@@ -10,6 +10,6 @@ import { makeGetAccountController } from '../../../factories/account/get-account
 export default (router: Router): void => {
   const accessAuth = expressMiddlewareAdapter(makeAuthMiddleware())
   router.get('/account', accessAuth, expressControllerAdapter(makeGetAccountController()))
-  router.put('/account/:accountId', accessAuth, expressControllerAdapter(makeUpdateAccountController()))
+  router.put('/account', accessAuth, expressControllerAdapter(makeUpdateAccountController()))
   router.delete('/account', accessAuth, expressControllerAdapter(makeRemoveAccountController()))
 }

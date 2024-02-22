@@ -1,7 +1,5 @@
 import request from 'supertest'
 import app from '../../config/app'
-import { JwtTokenAdapter } from '../../../../infra/adapters/token/jwt-token-adapter'
-import token_protocols from '../../../../domain/protocols/token'
 
 describe('Account Routes', () => {
   test('AuthMiddleware in PUT /account', async () => {
@@ -14,7 +12,7 @@ describe('Account Routes', () => {
       })
 
     await request(app)
-      .put('/api/account/any_accountId')
+      .put('/api/account')
       .send({
         name: 'new_name'
       })
@@ -31,10 +29,9 @@ describe('Account Routes', () => {
       })
 
     const { accessToken } = JSON.parse(text)
-    const { response: { payload } } = await new JwtTokenAdapter().parse(accessToken, token_protocols.accessToken_secret_key) as any
 
     await request(app)
-      .put(`/api/account/${payload.id}`)
+      .put('/api/account')
       .set('x-access-token', accessToken)
       .send({
         name: 'new_name'
