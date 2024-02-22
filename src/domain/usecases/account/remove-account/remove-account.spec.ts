@@ -1,6 +1,7 @@
 import { type Account } from '../../../entities/account'
-import { type AccountRepository } from './remove-account-protocols'
+import { type AccountRepository, type TaskRepository } from './remove-account-protocols'
 import { RemoveAccount } from './remove-account'
+import { type Task } from '../../../entities/task'
 
 const makeFakeAccount = (): Account => ({
   id: 'any_id',
@@ -31,18 +32,37 @@ const makeAccountRepository = (): AccountRepository => {
   return new AccountRepositoryStub()
 }
 
+const makeTaskRepository = (): TaskRepository => {
+  class TaskRepositoryStub implements TaskRepository {
+    async deleteAllFromAccount (): Promise<void> {
+      return new Promise(resolve => resolve())
+    }
+
+    findById: (taskId: string) => Promise<Task>
+    findByIsNotify: () => Promise<Task[]>
+    update: (taskData: Partial<Task>, taskId: string) => Promise<Task>
+    delete: (taskId: string) => Promise<void>
+    findAllByAccount: (accountId: string) => Promise<Task[]>
+    create: () => Promise<Task>
+  }
+  return new TaskRepositoryStub()
+}
+
 interface SutTypes {
   sut: RemoveAccount
   accountRepositoryStub: AccountRepository
+  taskRepositoryStub: TaskRepository
 }
 
 const makeSut = (): SutTypes => {
   const accountRepositoryStub = makeAccountRepository()
-  const sut = new RemoveAccount(accountRepositoryStub)
+  const taskRepositoryStub = makeTaskRepository()
+  const sut = new RemoveAccount(accountRepositoryStub, taskRepositoryStub)
 
   return {
     sut,
-    accountRepositoryStub
+    accountRepositoryStub,
+    taskRepositoryStub
   }
 }
 

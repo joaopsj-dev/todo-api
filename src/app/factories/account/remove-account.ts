@@ -4,10 +4,13 @@ import { RemoveAccountController } from '../../../presentation/controllers/accou
 import AccountModel from '../../../infra/db/sequelize/models/Account'
 import { accountIdSchema } from '../../zod/schemas/accountId-schema'
 import { RemoveAccount } from '../../../domain/usecases/account/remove-account/remove-account'
+import { SequelizeTaskRepositoryAdapter } from '../../../infra/adapters/repositories/task/sequelize-task-repository'
+import TaskModel from '../../../infra/db/sequelize/models/Task'
 
 export const makeRemoveAccountController = (): RemoveAccountController => {
   const accountRepository = new SequelizeAccountRepositoryAdapter(AccountModel)
-  const removeAccount = new RemoveAccount(accountRepository)
+  const taskRepository = new SequelizeTaskRepositoryAdapter(TaskModel)
+  const removeAccount = new RemoveAccount(accountRepository, taskRepository)
   //
   const validator = new ZodValidatorAdapter(accountIdSchema)
   //
