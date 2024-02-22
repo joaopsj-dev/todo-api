@@ -110,4 +110,13 @@ describe('RemoveAccount usecase', () => {
 
     expect(response).toBeTruthy()
   })
+
+  test('Should call deleteAllFromAccount with correct id', async () => {
+    const { sut, taskRepositoryStub } = makeSut()
+
+    const deleteSpy = jest.spyOn(taskRepositoryStub, 'deleteAllFromAccount')
+    await sut.remove('any_id')
+
+    expect(deleteSpy).toHaveBeenCalledWith('any_id')
+  })
 })
