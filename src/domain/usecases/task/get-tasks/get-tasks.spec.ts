@@ -55,6 +55,7 @@ const makeTaskRepository = (): TaskRepository => {
     update: (taskData: Partial<Task>, taskId: string) => Promise<Task>
     delete: (taskId: string) => Promise<void>
     create: () => Promise<Task>
+    deleteAllFromAccount: (accountId: string) => Promise<void>
   }
   return new TaskRepositoryStub()
 }

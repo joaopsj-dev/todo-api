@@ -58,4 +58,10 @@ export class SequelizeTaskRepositoryAdapter implements TaskRepository {
       where: { accountId }
     })
   }
+
+  async deleteAllFromAccount (accountId: string): Promise<void> {
+    await this.TaskModel.destroy({
+      where: { accountId }
+    })
+  }
 }
