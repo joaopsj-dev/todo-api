@@ -127,4 +127,15 @@ describe('Task Sequelize Repository', () => {
     expect(tasksByAccount.length).toBe(2)
     tasksByAccount.forEach(task => expect(task.accountId).toBe('valid_id'))
   })
+
+  test('Should delete all tasks from account', async () => {
+    const sut = makeSut()
+
+    await sut.create(makeFakeCreateTaskData())
+    await sut.create({ ...makeFakeCreateTaskData(), id: 'other_id' })
+    await sut.deleteAllFromAccount('valid_id')
+    const tasksByAccount = await sut.findAllByAccount('valid_id')
+
+    expect(tasksByAccount).toHaveLength(0)
+  })
 })
