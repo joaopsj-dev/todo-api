@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
+import { formatObjectDate } from '../../../helpers/format-objectDate'
 import { type AccountRepository, type Task, type TaskRepository } from './get-tasks-protocols'
 
 export class GetTasksFromAccount {
@@ -11,8 +13,12 @@ export class GetTasksFromAccount {
 
     const tasks = await this.taskRepository.findAllByAccount(accountId)
 
-    if (tasks[0]?.accountId !== accountId) return null
-
-    return tasks
+    return Promise.all(tasks.map(async task => {
+      const isDelayed = (task.endDate && new Date() > formatObjectDate(task.endDate)) && (task.status !== 'concluded' && task.status !== 'delayed')
+      if (isDelayed) {
+        task = await this.taskRepository.update({ status: 'delayed' }, task.id);
+      }
+      return task
+    }))
   }
 }
