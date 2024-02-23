@@ -36,8 +36,8 @@ const makeFakeTask = (): Task => ({
   accountId: 'any_accountId',
   name: 'any_name',
   description: 'any_description',
-  notifyDate: { year: notifyDate.getFullYear(), month: notifyDate.getMonth(), day: notifyDate.getDate(), hour: notifyDate.getHours(), minute: notifyDate.getMinutes() },
-  endDate: { year: endDate.getFullYear(), month: endDate.getMonth(), day: endDate.getDate(), hour: endDate.getHours(), minute: endDate.getMinutes() },
+  notifyDate: { year: notifyDate.getFullYear(), month: notifyDate.getMonth() + 1, day: notifyDate.getDate(), hour: notifyDate.getHours(), minute: notifyDate.getMinutes() },
+  endDate: { year: endDate.getFullYear(), month: endDate.getMonth() + 1, day: endDate.getDate(), hour: endDate.getHours(), minute: endDate.getMinutes() },
   isNotify: true,
   status: 'pending',
   createdAt: new Date(),
@@ -47,12 +47,20 @@ const makeFakeTask = (): Task => ({
 const makeTaskRepository = (): TaskRepository => {
   class TaskRepositoryStub implements TaskRepository {
     async findAllByAccount (): Promise<Task[]> {
-      return new Promise(resolve => resolve([makeFakeTask(), { ...makeFakeTask(), id: 'other_id' }]))
+      const taskData = makeFakeTask()
+      return new Promise(resolve => resolve([
+        taskData,
+        { ...taskData, id: 'other_id', endDate: { ...taskData.endDate, year: taskData.endDate.year - 1 } },
+        { ...taskData, id: 'other_id_2', endDate: { ...taskData.endDate, year: taskData.endDate.year - 1 }, status: 'concluded' },
+        { ...taskData, id: 'other_id_3', endDate: { ...taskData.endDate, year: taskData.endDate.year - 1 }, status: 'delayed' }]))
+    }
+
+    async update (): Promise<Task> {
+      return new Promise(resolve => resolve(makeFakeTask()))
     }
 
     findById: (taskId: string) => Promise<Task>
     findByIsNotify: () => Promise<Task[]>
-    update: (taskData: Partial<Task>, taskId: string) => Promise<Task>
     delete: (taskId: string) => Promise<void>
     create: () => Promise<Task>
     deleteAllFromAccount: (accountId: string) => Promise<void>
@@ -124,12 +132,14 @@ describe('GetTasksFromAccount usecase', () => {
     expect(findByIdSpy).toHaveBeenCalledWith('any_accountId')
   })
 
-  test('Should return null if the account id is incorrect', async () => {
-    const { sut } = makeSut()
+  test('Should call update with correct values if it is delayed', async () => {
+    const { sut, taskRepositoryStub } = makeSut()
 
-    const response = await sut.get('invalid_id')
+    const updateSpy = jest.spyOn(taskRepositoryStub, 'update')
+    await sut.get('any_accountId')
 
-    expect(response).toBeNull()
+    expect(updateSpy).toHaveBeenCalledWith({ status: 'delayed' }, 'other_id')
+    expect(updateSpy).toHaveBeenCalledTimes(1)
   })
 
   test('Should return all tasks if valid id provided', async () => {
@@ -137,6 +147,6 @@ describe('GetTasksFromAccount usecase', () => {
 
     const tasks = await sut.get('any_accountId')
 
-    expect(tasks.length).toEqual(2)
+    expect(tasks.length).toEqual(4)
   })
 })
