@@ -1,5 +1,5 @@
 import { type Account } from '../../../entities/account'
-import { type AccountRepository, type TaskRepository } from './remove-account-protocols'
+import { type TransactionManager, type AccountRepository, type TaskRepository, type Transaction } from './remove-account-protocols'
 import { RemoveAccount } from './remove-account'
 import { type Task } from '../../../entities/task'
 
@@ -48,21 +48,51 @@ const makeTaskRepository = (): TaskRepository => {
   return new TaskRepositoryStub()
 }
 
+const makeTransaction = (): Transaction => {
+  class TransactionStub implements Transaction {
+    getTransaction: () => any
+    beginTransaction: () => Promise<void>
+    commit: () => Promise<void>
+    rollback: () => Promise<void>
+  }
+
+  return new TransactionStub()
+}
+
+const makeTransactionManager = (): TransactionManager => {
+  class TransactionManagerStub implements TransactionManager {
+    async transaction <T>(fn: (transaction: Transaction) => Promise<T>): Promise<T> {
+      // eslint-disable-next-line no-useless-catch
+      try {
+        const result = await fn(makeTransaction())
+        return result
+      } catch (error) {
+        throw error
+      }
+    }
+  }
+
+  return new TransactionManagerStub()
+}
+
 interface SutTypes {
   sut: RemoveAccount
   accountRepositoryStub: AccountRepository
   taskRepositoryStub: TaskRepository
+  transactionManagerStub: TransactionManager
 }
 
 const makeSut = (): SutTypes => {
   const accountRepositoryStub = makeAccountRepository()
   const taskRepositoryStub = makeTaskRepository()
-  const sut = new RemoveAccount(accountRepositoryStub, taskRepositoryStub)
+  const transactionManagerStub = makeTransactionManager()
+  const sut = new RemoveAccount(accountRepositoryStub, taskRepositoryStub, transactionManagerStub)
 
   return {
     sut,
     accountRepositoryStub,
-    taskRepositoryStub
+    taskRepositoryStub,
+    transactionManagerStub
   }
 }
 
@@ -94,13 +124,41 @@ describe('RemoveAccount usecase', () => {
     expect(response).toBeFalsy()
   })
 
-  test('Should call delete with correct id', async () => {
+  test('Should throw TransactionManager throws', async () => {
+    const { sut, transactionManagerStub } = makeSut()
+
+    jest.spyOn(transactionManagerStub, 'transaction').mockRejectedValueOnce(new Error())
+    const promise = sut.remove('any_id')
+
+    await expect(promise).rejects.toThrow()
+  })
+
+  test('Should throw error if any delete method failed', async () => {
+    const { sut, transactionManagerStub, accountRepositoryStub } = makeSut()
+
+    jest.spyOn(accountRepositoryStub, 'delete').mockRejectedValueOnce(new Error())
+    const transactionSpy = jest.spyOn(transactionManagerStub, 'transaction')
+
+    await expect(sut.remove('any_id')).rejects.toThrow()
+    expect(transactionSpy).toHaveBeenCalled();
+  })
+
+  test('Should call delete with correct values', async () => {
     const { sut, accountRepositoryStub } = makeSut()
 
     const deleteSpy = jest.spyOn(accountRepositoryStub, 'delete')
     await sut.remove('any_id')
 
-    expect(deleteSpy).toHaveBeenCalledWith('any_id')
+    expect(deleteSpy).toHaveBeenCalledWith('any_id', {})
+  })
+
+  test('Should call deleteAllFromAccount with correct values', async () => {
+    const { sut, taskRepositoryStub } = makeSut()
+
+    const deleteSpy = jest.spyOn(taskRepositoryStub, 'deleteAllFromAccount')
+    await sut.remove('any_id')
+
+    expect(deleteSpy).toHaveBeenCalledWith('any_id', {})
   })
 
   test('Should return true if deleted account', async () => {
@@ -109,14 +167,5 @@ describe('RemoveAccount usecase', () => {
     const response = await sut.remove('any_id')
 
     expect(response).toBeTruthy()
-  })
-
-  test('Should call deleteAllFromAccount with correct id', async () => {
-    const { sut, taskRepositoryStub } = makeSut()
-
-    const deleteSpy = jest.spyOn(taskRepositoryStub, 'deleteAllFromAccount')
-    await sut.remove('any_id')
-
-    expect(deleteSpy).toHaveBeenCalledWith('any_id')
   })
 })
