@@ -1,6 +1,7 @@
-import { type ModelCtor } from 'sequelize'
+import { type ModelCtor, type Transaction as SequelizeTransaction } from 'sequelize'
 import { type AddAccountData, type Account } from '../../../../domain/entities/account';
 import { type AccountRepository } from '../../../../domain/ports/account-repository'
+import { type Transaction } from '../../../../domain/ports/transaction';
 
 export class SequelizeAccountRepositoryAdapter implements AccountRepository {
   constructor (
@@ -38,9 +39,10 @@ export class SequelizeAccountRepositoryAdapter implements AccountRepository {
     return this.findById(accountId)
   }
 
-  async delete (accountId: string): Promise<void> {
+  async delete (accountId: string, transaction?: Transaction): Promise<void> {
     await this.AccountModel.destroy({
-      where: { id: accountId }
+      where: { id: accountId },
+      transaction: transaction as unknown as SequelizeTransaction
     })
   }
 }

@@ -1,4 +1,5 @@
 import { type Task } from '../entities/task'
+import { type Transaction } from './transaction'
 
 export interface TaskRepository {
   create: (taskData: Task) => Promise<Task>
@@ -7,5 +8,5 @@ export interface TaskRepository {
   findById: (taskId: string) => Promise<Task>
   delete: (taskId: string) => Promise<void>
   findAllByAccount: (accountId: string) => Promise<Task[]>
-  deleteAllFromAccount: (accountId: string) => Promise<void>
+  deleteAllFromAccount: (accountId: string, transaction?: Transaction) => Promise<void>
 }

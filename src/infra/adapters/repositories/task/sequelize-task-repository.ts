@@ -1,6 +1,7 @@
-import { Op, type ModelCtor } from 'sequelize'
+import { Op, type ModelCtor, type Transaction as SequelizeTransaction } from 'sequelize'
 import { type Task } from '../../../../domain/entities/task';
 import { type TaskRepository } from '../../../../domain/ports/task-repository'
+import { type Transaction } from '../../../../domain/ports/transaction';
 
 export class SequelizeTaskRepositoryAdapter implements TaskRepository {
   constructor (
@@ -59,9 +60,10 @@ export class SequelizeTaskRepositoryAdapter implements TaskRepository {
     })
   }
 
-  async deleteAllFromAccount (accountId: string): Promise<void> {
+  async deleteAllFromAccount (accountId: string, transaction?: Transaction): Promise<void> {
     await this.TaskModel.destroy({
-      where: { accountId }
+      where: { accountId },
+      transaction: transaction as unknown as SequelizeTransaction
     })
   }
 }
